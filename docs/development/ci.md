@@ -12,6 +12,11 @@ registry authority.
 | windows/amd64 | `windows-latest`                                     | `make check-platform` |
 | windows/arm64 | `windows-latest-arm64-s` (same-repo only)            | `make check-platform` |
 
+`.github/workflows/surface-scan.yml` scans every pull request (tree, commit
+messages, title, body and branch name) with limensafe's built-in public
+baseline, `contents: read` and no secrets. The maintainer catalog scan runs
+locally in `make pr-final`.
+
 The runner image is the Linux toolchain: Go, goneat, actionlint and Python
 come from it, pinned by digest. The native cells install only the pinned Go
 and Python (`.github/actions/make-check`). Every action is pinned by commit.

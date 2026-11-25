@@ -10,8 +10,8 @@ project already uses.
 This repository is at its first step. The binary builds and implements three
 commands: `version` (with `--extended` and `--format json`), `envinfo` and
 `doctor`. `doctor` checks only fuzzmuster's own installation; it does not yet
-check fuzzing toolchains or host controls. Nothing below "What we are
-building" is implemented yet.
+check fuzzing toolchains or host controls. The other commands in "What we are
+building" are not implemented yet.
 
 ## Why
 
@@ -47,7 +47,7 @@ Design rules that hold from the first release:
   on a host, the run reports an unsupported host instead.
 - Reports describe bounded observations (build, budget, engine, coverage
   units). Finishing a budget is not a claim that no defects remain.
-- The shipped binary and library are pure Go, built with cgo off, with
+- The shipped binary is pure Go, built with cgo off, with
   permissively licensed dependencies listed in
   [config/dependencies.txt](config/dependencies.txt).
 

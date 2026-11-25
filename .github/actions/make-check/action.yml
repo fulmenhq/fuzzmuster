@@ -1,0 +1,49 @@
+name: make check-platform
+description: Install the pinned Go and Python, run make check-platform, and require an unchanged tree.
+inputs:
+  goos:
+    description: Expected GOOS of the native host.
+    required: true
+  goarch:
+    description: Expected GOARCH of the native host.
+    required: true
+  go-toolchain:
+    description: Go toolchain version.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+      with:
+        python-version: "3.12"
+    - name: Install Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+      with:
+        go-version: ${{ inputs.go-toolchain }}
+        cache: false
+    - name: Verify native host and toolchain
+      shell: bash
+      env:
+        WANT_GOOS: ${{ inputs.goos }}
+        WANT_GOARCH: ${{ inputs.goarch }}
+        GO_TOOLCHAIN: ${{ inputs.go-toolchain }}
+        GOTOOLCHAIN: local
+      run: |
+        set -euo pipefail
+        test "$(go env GOOS)/$(go env GOARCH)" = "${WANT_GOOS}/${WANT_GOARCH}"
+        go version | grep "^go version go${GO_TOOLCHAIN} "
+        python --version
+        command -v make >/dev/null || { echo "make is required on the runner" >&2; exit 1; }
+        make --version | head -1
+    - name: make check-platform
+      shell: bash
+      env:
+        PYTHONUTF8: "1"
+        GITHUB_TOKEN: ""
+      run: make check-platform PYTHON=python
+    - name: Working tree unchanged by the gate
+      shell: bash
+      run: |
+        git status --porcelain
+        test -z "$(git status --porcelain)"

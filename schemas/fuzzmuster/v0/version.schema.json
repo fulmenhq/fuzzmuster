@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/version.schema.json",
+  "title": "fuzzmuster version report",
+  "description": "Output of `fuzzmuster version --format json`. Fields after `extended` appear only when it is true. A null boolean means the build did not record that fact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "name",
+    "version",
+    "extended"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://schemas.fulmenhq.dev/fuzzmuster/v0/version.schema.json"
+    },
+    "name": {
+      "const": "fuzzmuster"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extended": {
+      "type": "boolean"
+    },
+    "commit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_date": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vcs_modified": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "go_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "os": {
+      "type": "string",
+      "minLength": 1
+    },
+    "arch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cgo_enabled": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "main_module": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "version"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sum": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "extended": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "commit",
+      "build_date",
+      "vcs_modified",
+      "go_version",
+      "os",
+      "arch",
+      "cgo_enabled",
+      "main_module",
+      "modules"
+    ]
+  },
+  "else": {
+    "not": {
+      "anyOf": [
+        {
+          "required": [
+            "commit"
+          ]
+        },
+        {
+          "required": [
+            "build_date"
+          ]
+        },
+        {
+          "required": [
+            "vcs_modified"
+          ]
+        },
+        {
+          "required": [
+            "go_version"
+          ]
+        },
+        {
+          "required": [
+            "os"
+          ]
+        },
+        {
+          "required": [
+            "arch"
+          ]
+        },
+        {
+          "required": [
+            "cgo_enabled"
+          ]
+        },
+        {
+          "required": [
+            "main_module"
+          ]
+        },
+        {
+          "required": [
+            "modules"
+          ]
+        }
+      ]
+    }
+  }
+}

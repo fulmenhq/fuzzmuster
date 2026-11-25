@@ -1,0 +1,10 @@
+# yamllint configuration for goneat's lint assessment and `yamllint`.
+extends: default
+rules:
+  document-start: disable
+  line-length:
+    max: 160
+  truthy:
+    check-keys: false
+  comments:
+    min-spaces-from-content: 2

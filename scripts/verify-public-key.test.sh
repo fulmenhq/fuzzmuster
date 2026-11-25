@@ -4,7 +4,8 @@
 # (gpg's armor or a canonical re-armor) passes; an armored secret export, a
 # public export followed by a binary or armored secret export, secret bytes
 # carried inside one public block (as secret, literal-data or experimental
-# packets), extra data after the checksum, a wrong checksum, trailing junk,
+# packets, or appended inside a key, user ID or signature packet body), a
+# free-form signature notation, a long user ID, extra data after the checksum, a wrong checksum, trailing junk,
 # two public blocks and a missing gpg are each refused. Needs gpg and python3; makes no network calls.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
@@ -12,7 +13,7 @@ check="$root/scripts/verify-public-key.sh"
 scratch="$(mktemp -d)"
 home="$scratch/gnupg"
 mkdir -m 700 "$home"
-trap 'gpgconf --homedir "$home" --kill all > /dev/null 2>&1 || true; rm -rf "$scratch"' EXIT
+trap 'for h in "$home" "$scratch/gnupg2" "$scratch/gnupg3"; do gpgconf --homedir "$h" --kill all > /dev/null 2>&1 || true; done; rm -rf "$scratch"' EXIT
 g() { gpg --homedir "$home" --batch --pinentry-mode loopback --passphrase '' "$@"; }
 g --quick-gen-key 'Fixture <fixture@example.invalid>' ed25519 sign never > /dev/null 2>&1
 fpr="$(g --with-colons --list-keys | awk -F: '$1=="fpr" {print $10; exit}')"
@@ -92,6 +93,65 @@ sed 's/^\(=.*\)$/\1\nQUFBQQ==/' "$scratch/rearmored.asc" > "$scratch/after-crc.a
 refuse "$check" "$scratch/after-crc.asc"
 sed 's/^=.*$/=AAAA/' "$scratch/rearmored.asc" > "$scratch/bad-crc.asc"
 WANT="checksum" refuse "$check" "$scratch/bad-crc.asc"
+# Secret bytes appended inside the body of an allowed packet (key, user ID,
+# signature): GnuPG drops or rejects them, so the round trip refuses.
+"${PYTHON:-python3}" -I -B - "$scratch" << 'PY'
+import sys
+S = sys.argv[1]
+raw = open(f"{S}/pub.bin", "rb").read()
+sec = open(f"{S}/sec.bin", "rb").read()
+def packets(b):
+    out, p = [], 0
+    while p < len(b):
+        c = b[p]; p += 1
+        if c & 0x40:
+            t, o = c & 0x3F, b[p]
+            if o < 192: n, p = o, p + 1
+            elif o < 224: n, p = ((o - 192) << 8) + b[p + 1] + 192, p + 2
+            else: n, p = int.from_bytes(b[p + 1:p + 5], "big"), p + 5
+        else:
+            t, k = (c >> 2) & 15, (1, 2, 4)[c & 3]
+            n, p = int.from_bytes(b[p:p + k], "big"), p + k
+        out.append((t, b[p:p + n])); p += n
+    return out
+def enc(t, body): return bytes([0xC0 | t, 255]) + len(body).to_bytes(4, "big") + body
+for victim in (6, 13, 2):
+    out, done = b"", False
+    for t, body in packets(raw):
+        if t == victim and not done:
+            body, done = body + sec, True
+        out += enc(t, body)
+    open(f"{S}/stuffed{victim}.bin", "wb").write(out)
+PY
+for victim in 6 13 2; do
+    armor "$scratch/stuffed$victim.asc" "$scratch/stuffed$victim.bin"
+    refuse "$check" "$scratch/stuffed$victim.asc"
+done
+# Free-form data in a signature notation, and a long user ID, each on a
+# fresh throwaway key.
+fresh_key() {
+    local h="$1"
+    mkdir -m 700 "$h"
+    gpg --homedir "$h" --batch --pinentry-mode loopback --passphrase '' \
+        --quick-gen-key 'Fixture <fixture@example.invalid>' ed25519 sign never > /dev/null 2>&1
+    gpg --homedir "$h" --with-colons --list-keys 2> /dev/null | awk -F: '$1=="fpr" {print $10; exit}'
+}
+h2="$scratch/gnupg2"
+f2="$(fresh_key "$h2")"
+gpg --homedir "$h2" --batch --pinentry-mode loopback --passphrase '' \
+    --cert-notation 'data@example.invalid=QUFBQUFBQUFBQUFBQUFBQQ' --quick-add-uid "$f2" 'Second <second@example.invalid>' > /dev/null 2>&1
+gpg --homedir "$h2" --armor --export "$f2" > "$scratch/notation.asc" 2> /dev/null
+grep -q 'data@example.invalid' <(gpg --homedir "$h2" --list-packets "$scratch/notation.asc" 2> /dev/null) || {
+    echo 'error: fixture did not produce a notation' >&2
+    exit 1
+}
+WANT="notation" refuse "$check" "$scratch/notation.asc"
+h3="$scratch/gnupg3"
+f3="$(fresh_key "$h3")"
+gpg --homedir "$h3" --batch --pinentry-mode loopback --passphrase '' \
+    --quick-add-uid "$f3" "Fixture $(printf 'A%.0s' $(seq 1 200)) <fixture@example.invalid>" > /dev/null 2>&1
+gpg --homedir "$h3" --armor --export "$f3" > "$scratch/longuid.asc" 2> /dev/null
+WANT="user ID" refuse "$check" "$scratch/longuid.asc"
 : > "$scratch/empty.asc"
 refuse "$check" "$scratch/empty.asc"
 # gpg missing: a PATH with only python3 and core tools, no gpg.

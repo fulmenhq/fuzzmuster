@@ -7,7 +7,9 @@
 #
 # Accept KEY_FILE only if it is exactly one canonically armored OpenPGP
 # public key block, with nothing but whitespace around it, whose packets are
-# all public-key packet types, and GnuPG agrees there is no secret key. Anything else, including
+# all public-key packet types, whose signature subpackets and user IDs carry
+# no free-form data, and which is byte for byte GnuPG's own export of the
+# keys it imports, with no secret key anywhere. Anything else, including
 # trailing data after the armor, any non-ASCII byte, or a missing gpg, is
 # refused. Exit 0 means safe to publish; any other exit means do not.
 set -euo pipefail
@@ -142,5 +144,39 @@ if grep -Eq '^(sec|ssb):' <<< "$listing"; then
     die "$key contains secret key material"
 fi
 grep -Eq '^pub:' <<< "$listing" || die "$key holds no public key"
+
+# 3. Only standard signature subpackets, with bounded lengths; free-form data
+#    (policy URLs, arbitrary notations, other fields) is refused. 32 is the
+#    embedded back-signature a signing subkey needs; 20 is allowed only for
+#    the short notations GnuPG itself adds (manu, salt).
+while read -r type len rest; do
+    case "$type" in
+        2 | 3 | 9 | 11 | 16 | 21 | 22 | 23 | 25 | 27 | 30 | 33 | 34 | 35 | 39) max=64 ;;
+        32) max=1024 ;;
+        20)
+            max=64
+            [[ "$rest" =~ ^\(notation:\ (manu|salt@notations\.gnupg\.org)= ]] ||
+                die "$key carries a signature notation that is not allowed"
+            ;;
+        *) die "$key carries signature subpacket type $type, which is not allowed" ;;
+    esac
+    ((len <= max)) || die "$key carries an oversized signature subpacket (type $type, $len bytes)"
+done < <(sed -nE 's/.*subpkt ([0-9]+) len ([0-9]+) ?(.*)/\1 \2 \3/p' <<< "$packets")
+
+# 4. User IDs are short printable text.
+while IFS= read -r uid; do
+    [[ ${#uid} -le 128 && "$uid" =~ ^[[:print:]]+$ ]] || die "$key has a user ID that is not short printable text"
+done < <(awk -F: '$1=="uid" {print $10}' <<< "$listing")
+
+# 5. Round trip: import into the empty keyring and re-export. The file must
+#    be byte for byte what GnuPG exports for the keys it holds, so nothing can
+#    ride inside or after a packet that GnuPG does not keep.
+gpg --homedir "$home" --batch --quiet --import "$key" > /dev/null 2>&1 || die 'gpg could not import the key file'
+gpg --homedir "$home" --batch --list-secret-keys --with-colons 2> /dev/null | grep -q '^sec:' &&
+    die "$key imported secret key material"
+gpg --homedir "$home" --batch --dearmor -o "$home/input.bin" < "$key" 2> /dev/null || die 'gpg could not dearmor the key file'
+gpg --homedir "$home" --batch --export -o "$home/export.bin" 2> /dev/null || die 'gpg could not re-export the key'
+cmp -s "$home/input.bin" "$home/export.bin" ||
+    die "$key differs from GnuPG's own export of its keys (extra data inside or between packets)"
 
 echo "[ok] $key: one armored public key block, no secret key material"

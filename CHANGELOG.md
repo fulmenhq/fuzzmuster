@@ -16,5 +16,9 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Checks: no cgo and a hand-listed dependency closure (`make deps-check`),
   committed-content check, standalone smoke run, CI on Linux (x86_64,
   aarch64), macOS (arm64) and Windows (x86_64, aarch64).
+- Release tooling: signed-tag ceremony and verification against a committed
+  public signing pin (`RELEASE_CHECKLIST.md`), licence-file check, and a
+  public-surface scan of the tree, commit messages, PR text and branch name
+  (`make surface-scan`, baseline scan in CI).
 
 [Unreleased]: https://github.com/fulmenhq/fuzzmuster/commits/main

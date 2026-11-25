@@ -28,13 +28,19 @@ make check-platform
 ```
 
 This runs `gofmt` and `go vet`, the tests with cgo off, a smoke run of the
-built binary outside the repository, the dependency rule, and the check of
-committed files for local paths, keys and tokens.
+built binary outside the repository, the dependency rule, the check of
+committed files for local paths, keys and tokens, and the licence-file check.
 
 `make check` is what the Linux CI cells run. It adds goneat's format and lint
 gates and the dependency-rule controls; run `make bootstrap` first to install
 goneat. Before pushing, run `make prepush`, which adds the race detector
-(needs a C compiler), `actionlint` and the licence audit.
+(needs a C compiler), `actionlint`, the licence audit and the release tooling
+suites (`make release-tooling-test`: throwaway keys and local fixtures only;
+needs gpg, jq and decernor, plus limensafe for the surface-scan suite).
+
+Pull requests are also scanned in CI for public-surface findings in the tree,
+commit messages, title, body and branch name, with limensafe's built-in
+baseline.
 
 Change the version only through `make version-set V=X.Y.Z` or the
 `make version-bump-*` targets; they keep `VERSION` and the app identity in

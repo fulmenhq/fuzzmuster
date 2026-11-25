@@ -34,7 +34,9 @@ and PR text as permanent public content: say what changed, briefly.
 
 Run `make check-platform` before committing (or `make check` with goneat
 installed), `make prepush` before pushing and `make pr-final` before opening
-or updating a PR.
+or updating a PR. `make pr-final` scans the PR title and body: write them to
+a file and pass it as `FUZZMUSTER_SURFACE_PR_TEXT`, with the surface catalog
+in `LIMENSAFE_CATALOG_PATH`.
 
 Use the public attribution footer on commits and PR bodies:
 

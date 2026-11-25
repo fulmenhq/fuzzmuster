@@ -25,9 +25,17 @@ var (
 	// rootCmd represents the base command
 	rootCmd *cobra.Command
 
-	// loggerInstance holds the logger (used by subcommands)
-	loggerInstance *logging.Logger
+	// configErr is the error from loading the operator configuration, if
+	// any. Commands that need the configuration refuse to run with it;
+	// version, help, envinfo and doctor still run so they can report it.
+	configErr error
 )
+
+// ConfigError marks an operator configuration that could not be loaded.
+type ConfigError struct{ Err error }
+
+func (e *ConfigError) Error() string { return e.Err.Error() }
+func (e *ConfigError) Unwrap() error { return e.Err }
 
 // UsageError marks a command-line usage problem: an unknown command or flag,
 // a missing or invalid flag value, or an unexpected argument.
@@ -45,6 +53,10 @@ func ExitCode(err error) int {
 	if errors.As(err, &ue) || isCobraUsageError(err) {
 		return foundry.ExitUsage
 	}
+	var ce *ConfigError
+	if errors.As(err, &ce) {
+		return foundry.ExitConfigInvalid
+	}
 	return foundry.ExitFailure
 }
 
@@ -53,10 +65,11 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-// Initialize sets up the root command with app identity, logger, and config
-func Initialize(ctx context.Context, identity *appidentity.Identity, logger *logging.Logger, cfg *config.Config) {
+// Initialize sets up the root command with app identity, logger, and the
+// configuration (or the error from loading it).
+func Initialize(ctx context.Context, identity *appidentity.Identity, logger *logging.Logger, cfg *config.Config, cfgErr error) {
 	_ = cfg
-	loggerInstance = logger
+	configErr = cfgErr
 
 	rootCmd = &cobra.Command{
 		Use:   identity.BinaryName,
@@ -76,7 +89,13 @@ version, envinfo and doctor commands are implemented.`,
 					level = env
 				}
 			}
-			return applyLogLevel(logger, level)
+			if err := applyLogLevel(logger, level); err != nil {
+				return err
+			}
+			if configErr != nil && !reportsConfig(cmd) {
+				return &ConfigError{configErr}
+			}
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -116,6 +135,19 @@ func applyLogLevel(logger *logging.Logger, level string) error {
 		return &UsageError{fmt.Errorf("invalid log level %q (use trace|debug|info|warn|error)", level)}
 	}
 	return nil
+}
+
+// reportsConfig names the commands that run with a broken configuration:
+// the root (help), help, version, and the two diagnostics that report it.
+func reportsConfig(cmd *cobra.Command) bool {
+	if !cmd.HasParent() {
+		return true
+	}
+	switch cmd.Name() {
+	case "help", "version", "envinfo", "doctor":
+		return true
+	}
+	return false
 }
 
 // noArgs refuses positional arguments, including an unknown subcommand

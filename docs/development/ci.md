@@ -21,10 +21,14 @@ The runner image is the Linux toolchain: Go, goneat, actionlint and Python
 come from it, pinned by digest. The native cells install only the pinned Go
 and Python (`.github/actions/make-check`). Every action is pinned by commit.
 
-Run the Linux gate locally in the same image before pushing:
+Run the Linux gate locally in the same image, as the same user, before
+pushing. The image's own GOPATH is not writable by that user, so CI points
+GOPATH, GOMODCACHE and GOCACHE under HOME:
 
 ```sh
-docker run --rm -v "$PWD":/src -w /src --entrypoint bash \
+docker run --rm -v "$PWD":/src -w /src --user 1001:1001 \
+  -e HOME=/tmp/home -e GOPATH=/tmp/home/gopath -e GOMODCACHE=/tmp/home/gomodcache \
+  -e GOCACHE=/tmp/home/gocache --entrypoint bash \
   ghcr.io/fulmenhq/goneat-tools-runner-glibc:v0.5.16 \
-  -c 'git config --global --add safe.directory /src && make check'
+  -c 'mkdir -p "$HOME" && git config --global --add safe.directory /src && make check'
 ```

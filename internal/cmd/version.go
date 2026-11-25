@@ -113,6 +113,9 @@ func writeVersionJSON(w io.Writer, name string, info buildinfo.Info, extended bo
 	doc := versionDoc{Schema: VersionSchemaID, Name: name, Version: info.Version, Extended: extended}
 	if extended {
 		modules := info.Modules
+		if modules == nil {
+			modules = []buildinfo.Module{}
+		}
 		main := orUnknown(info.MainModule)
 		doc.Commit = &info.Commit
 		doc.BuildDate = &info.BuildDate

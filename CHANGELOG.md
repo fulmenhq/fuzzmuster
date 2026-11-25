@@ -8,6 +8,9 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `doctor` and `envinfo` write their reports to stderr at every log level;
+  a configuration that fails to load stops every command except `version`,
+  help, `envinfo` and `doctor`, which reports it (exit 20).
 - Release-artifact signing that fails closed and is bound to the committed
   signing pin; whole-file public-key validation; an import-parsing cgo check
   and a refusal of `replace` directives in the dependency gate; the release

@@ -15,8 +15,5 @@ go.uber.org/multierr                        MIT                      error aggre
 gopkg.in/natefinch/lumberjack.v2            MIT                      log file rotation (gofulmen logging)
 gopkg.in/yaml.v3                            MIT AND Apache-2.0       YAML decoding
 github.com/santhosh-tekuri/jsonschema/v5    Apache-2.0               JSON Schema validation (gofulmen)
-github.com/bmatcuk/doublestar/v4            MIT                      glob matching (gofulmen)
 github.com/google/uuid                      BSD-3-Clause             identifiers (gofulmen)
-github.com/zeebo/xxh3                       BSD-2-Clause             hashing (gofulmen)
-github.com/klauspost/cpuid/v2               MIT                      CPU feature detection (xxh3)
 golang.org/x/time                           BSD-3-Clause             rate limiting (gofulmen)

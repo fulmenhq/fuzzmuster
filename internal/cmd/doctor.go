@@ -3,53 +3,54 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	"github.com/fulmenhq/gofulmen/appidentity"
+
+	"github.com/fulmenhq/fuzzmuster/internal/config"
 )
 
 // newDoctorCmd creates the doctor command. In this build it checks only
 // fuzzmuster's own installation. Fuzzing toolchains and host controls are
 // not checked yet, and the output says so rather than implying a host is
-// ready to fuzz.
+// ready to fuzz. The report goes to stderr whatever the log level.
 func newDoctorCmd(identity *appidentity.Identity) *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "doctor",
 		Short: "Check this fuzzmuster installation",
 		Long: `Check this fuzzmuster installation: its identity and the operator
-configuration location. Fuzzing toolchains, engines and host controls are
-not checked in this build.`,
+configuration. Fuzzing toolchains, engines and host controls are not checked
+in this build. The report goes to stderr; the exit code is 0 when every
+check passes, 20 for a configuration problem and 1 otherwise.`,
 		Args: noArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			name := identity.BinaryName
-			loggerInstance.Info(fmt.Sprintf("=== %s doctor ===", name))
+			w := &report{w: cmd.ErrOrStderr()}
+			w.printf("=== %s doctor ===\n", identity.BinaryName)
 
 			if identity.BinaryName == "" || identity.Vendor == "" {
-				loggerInstance.Error("[1/2] App identity... invalid")
-				return fmt.Errorf("app identity is incomplete")
+				w.println("[1/2] App identity: FAIL (incomplete)")
+				return w.done(fmt.Errorf("app identity is incomplete"))
 			}
-			loggerInstance.Info("[1/2] App identity... ok",
-				zap.String("binary_name", identity.BinaryName),
-				zap.String("vendor", identity.Vendor))
+			w.printf("[1/2] App identity: ok (%s, vendor %s)\n", identity.BinaryName, identity.Vendor)
 
-			homeDir, err := os.UserHomeDir()
+			path, err := config.ConfigPath(identity)
 			if err != nil {
-				loggerInstance.Error("[2/2] Config location... cannot resolve the home directory", zap.Error(err))
-				return fmt.Errorf("cannot resolve the home directory: %w", err)
+				w.printf("[2/2] Configuration: FAIL (%v)\n", err)
+				return w.done(&ConfigError{err})
 			}
-			configFile := filepath.Join(homeDir, ".config", identity.Vendor, identity.ConfigName+".yaml")
-			if _, err := os.Stat(configFile); err == nil {
-				loggerInstance.Info("[2/2] Config location... "+configFile+" (present)", zap.String("config_file", configFile))
+			if configErr != nil {
+				w.printf("[2/2] Configuration: FAIL (%v)\n", configErr)
+				return w.done(&ConfigError{configErr})
+			}
+			if _, err := os.Lstat(path); err == nil {
+				w.printf("[2/2] Configuration: ok (%s)\n", path)
 			} else {
-				loggerInstance.Info("[2/2] Config location... "+configFile+" (absent; none is needed)", zap.String("config_file", configFile))
+				w.printf("[2/2] Configuration: ok (%s absent; none is needed)\n", path)
 			}
 
-			loggerInstance.Info("Installation checks passed. Fuzzing toolchains and host controls are not checked in this build.")
-			return nil
+			w.println("Installation checks passed. Fuzzing toolchains and host controls are not checked in this build.")
+			return w.done(nil)
 		},
 	}
-	return cmd
 }

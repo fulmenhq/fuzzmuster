@@ -165,7 +165,7 @@ lint: vet-fmt ## go vet, gofmt and goneat lint assessment
 	@$(GONEAT_BIN) assess --categories lint --package-mode --fail-on medium
 
 vet-fmt: ## gofmt and go vet (no goneat needed)
-	@out="$$(gofmt -l cmd internal)"; if [ -n "$$out" ]; then echo "error: gofmt: $$out" >&2; exit 1; fi
+	@out="$$(gofmt -l cmd internal tools)"; if [ -n "$$out" ]; then echo "error: gofmt: $$out" >&2; exit 1; fi
 	$(GO) vet ./...
 
 lint-workflows: ## actionlint on the workflows

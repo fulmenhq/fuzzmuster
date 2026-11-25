@@ -56,14 +56,15 @@ func main() {
 		}
 	}()
 
-	cfg, err := config.LoadConfig(ctx, identity, logger)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "fuzzmuster: %v\n", err)
-		os.Exit(foundry.ExitConfigInvalid)
+	// A configuration that fails to load does not stop version, help,
+	// envinfo or doctor; every other command refuses with exit 20.
+	cfg, cfgErr := config.LoadConfig(ctx, identity, logger)
+	if cfg == nil {
+		cfg = &config.Config{}
 	}
 
 	cmd.SetVersionInfo(version, commit, buildDate)
-	cmd.Initialize(ctx, identity, logger, cfg)
+	cmd.Initialize(ctx, identity, logger, cfg, cfgErr)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", identity.BinaryName, err)
 		code := cmd.ExitCode(err)

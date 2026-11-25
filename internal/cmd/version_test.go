@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -36,11 +37,28 @@ func testIdentity() *appidentity.Identity {
 	}
 }
 
-// runRoot runs the full root command with the given build information and
-// returns the exit code main would use and what went to stdout.
-func runRoot(t *testing.T, bi buildinfo.Info, args ...string) (int, string, error) {
+// setHome points both HOME and USERPROFILE (what os.UserHomeDir reads on
+// Windows) at a fresh directory, so no test touches the real profile.
+func setHome(t *testing.T) string {
 	t.Helper()
-	t.Setenv("HOME", t.TempDir())
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	return home
+}
+
+type result struct {
+	code   int
+	stdout string
+	stderr string
+	err    error
+}
+
+// runWith runs the full root command with the given build information and
+// configuration error, and returns the exit code main would use.
+func runWith(t *testing.T, bi buildinfo.Info, cfgErr error, args ...string) result {
+	t.Helper()
+	setHome(t)
 	saved := info
 	info = bi
 	t.Cleanup(func() { info = saved })
@@ -48,13 +66,20 @@ func runRoot(t *testing.T, bi buildinfo.Info, args ...string) (int, string, erro
 	if err != nil {
 		t.Fatal(err)
 	}
-	Initialize(context.Background(), testIdentity(), logger, &config.Config{})
-	var out bytes.Buffer
+	Initialize(context.Background(), testIdentity(), logger, &config.Config{}, cfgErr)
+	var out, errb bytes.Buffer
 	rootCmd.SetOut(&out)
-	rootCmd.SetErr(&bytes.Buffer{})
+	rootCmd.SetErr(&errb)
 	rootCmd.SetArgs(args)
 	err = Execute()
-	return ExitCode(err), out.String(), err
+	return result{ExitCode(err), out.String(), errb.String(), err}
+}
+
+// runRoot runs the root command with no configuration error.
+func runRoot(t *testing.T, bi buildinfo.Info, args ...string) (int, string, error) {
+	t.Helper()
+	r := runWith(t, bi, nil, args...)
+	return r.code, r.stdout, r.err
 }
 
 func TestVersionText(t *testing.T) {
@@ -187,6 +212,7 @@ func TestUsageErrorsExit64(t *testing.T) {
 		{"version", "--format"},
 		{"--log-level", "loud", "version"},
 		{"doctor", "extra"},
+		{"envinfo", "extra"},
 	}
 	for _, args := range cases {
 		code, out, err := runRoot(t, fixtureInfo(), args...)
@@ -233,5 +259,66 @@ func TestOnlyImplementedCommandsAreListed(t *testing.T) {
 	want := []string{"doctor", "envinfo", "version"}
 	if !reflect.DeepEqual(names, want) {
 		t.Fatalf("available commands %v, want %v; do not list a command that is not implemented", names, want)
+	}
+}
+
+func TestNoArgumentsWording(t *testing.T) {
+	_, _, err := runRoot(t, fixtureInfo(), "version", "extra")
+	if err == nil || err.Error() != `fuzzmuster version takes no arguments, got "extra"` {
+		t.Fatalf("err=%v", err)
+	}
+	_, _, err = runRoot(t, fixtureInfo(), "nosuch")
+	if err == nil || err.Error() != `unknown command "nosuch"` {
+		t.Fatalf("err=%v", err)
+	}
+}
+
+func TestIsCobraUsageError(t *testing.T) {
+	for _, msg := range []string{"unknown command x", "unknown flag: --x", "unknown shorthand flag: 'x'", "invalid argument \"x\"", "flag needs an argument: --x", "required flag(s) \"x\" not set"} {
+		if !isCobraUsageError(errors.New(msg)) || ExitCode(errors.New(msg)) != foundry.ExitUsage {
+			t.Errorf("%q not recognised as a usage error", msg)
+		}
+	}
+	if isCobraUsageError(errors.New("disk full")) || ExitCode(errors.New("disk full")) != foundry.ExitFailure {
+		t.Error("an ordinary error was treated as a usage error")
+	}
+	if ExitCode(&ConfigError{errors.New("x")}) != foundry.ExitConfigInvalid || ExitCode(nil) != foundry.ExitSuccess {
+		t.Error("config or nil error mapped wrongly")
+	}
+}
+
+func TestLogLevels(t *testing.T) {
+	logger, err := logging.NewCLI("fuzzmuster")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := map[string]logging.Severity{
+		"trace": logging.DEBUG /* gofulmen has no separate trace level */, "DEBUG": logging.DEBUG, "info": logging.INFO, "": logging.INFO,
+		"warn": logging.WARN, "Warning": logging.WARN, "error": logging.ERROR,
+	}
+	for in, want := range cases {
+		if err := applyLogLevel(logger, in); err != nil {
+			t.Fatalf("%q: %v", in, err)
+		}
+		if got := logger.GetLevel(); got != want {
+			t.Errorf("%q: level %v, want %v", in, got, want)
+		}
+	}
+}
+
+func TestVersionModulesNeverNull(t *testing.T) {
+	bi := fixtureInfo()
+	bi.Modules = nil
+	_, out, _ := runRoot(t, bi, "version", "--format", "json", "--extended")
+	if !strings.Contains(out, `"modules": []`) {
+		t.Fatalf("modules must be an empty array:\n%s", out)
+	}
+	_, out, _ = runRoot(t, bi, "version", "--extended")
+	if !strings.Contains(out, "Modules:       0\n") {
+		t.Fatalf("text module count:\n%s", out)
+	}
+	_, out, _ = runRoot(t, fixtureInfo(), "version", "--extended")
+	if !strings.Contains(out, "Modules:       1\n") {
+		t.Fatalf("text module count:\n%s", out)
 	}
 }

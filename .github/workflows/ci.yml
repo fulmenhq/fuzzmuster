@@ -42,6 +42,10 @@ jobs:
       options: --user 1001:1001
     env:
       HOME: /github/home
+      # The image's GOPATH is not writable by the CI user (uid 1001).
+      GOPATH: /github/home/gopath
+      GOMODCACHE: /github/home/gomodcache
+      GOCACHE: /github/home/gocache
       PYTHONUTF8: "1"
     timeout-minutes: 20
     defaults:
@@ -81,6 +85,10 @@ jobs:
       options: --user 1001:1001
     env:
       HOME: /github/home
+      # The image's GOPATH is not writable by the CI user (uid 1001).
+      GOPATH: /github/home/gopath
+      GOMODCACHE: /github/home/gomodcache
+      GOCACHE: /github/home/gocache
       PYTHONUTF8: "1"
     timeout-minutes: 20
     defaults:

@@ -159,20 +159,21 @@ empty value, so `unset RELEASE_TAG` first.
 Build from a clean checkout of the verified tag, so the binaries carry the
 tagged version and commit.
 
-- [ ] Build, package and sign: `make package-sign`, with `GNUPGHOME` set to
-      the release GnuPG home (its default signing key is used) and
-      `SIGNING_KEY_ID` set to export the public key. Output in
-      `dist/release/`: one archive per release platform, `SHA256SUMS`, and
-      the detached signature `SHA256SUMS.asc`.
-- [ ] The exported public key holds no private material:
-      `make verify-release-key`
-- [ ] `SHA256SUMS.asc` verifies in an isolated keyring imported only from
-      `docs/security/release-signing-keys.asc`, made by the pinned signing
-      subkey
+- [ ] Build, package and sign: `make package-sign` with the same
+      `FUZZMUSTER_RELEASE_TAG`, `FUZZMUSTER_GPG_HOMEDIR`,
+      `FUZZMUSTER_PGP_KEY_ID`, `FUZZMUSTER_GPG_SIGNING_FINGERPRINT` and
+      `FUZZMUSTER_DECERNOR_BIN` as the tag step. It signs with the committed
+      signing subkey only, verifies `SHA256SUMS.asc` in a fresh keyring
+      imported only from `docs/security/release-signing-keys.asc`, and
+      copies that pin to `dist/release/fuzzmuster-release-signing-key.asc`
+      after `scripts/verify-public-key.sh` accepts it. Any failure stops the
+      step. Output in `dist/release/`: one archive per release platform,
+      `SHA256SUMS`, `SHA256SUMS.asc` and the public key.
+- [ ] Re-check the published key file: `make verify-release-key`
 - [ ] Generate the SBOM: `make dependencies` (`sbom/fuzzmuster.cdx.json`)
 - [ ] Create a draft GitHub release for the tag with the notes from
       `docs/releases/vX.Y.Z.md`, and upload the archives, `SHA256SUMS`,
-      `SHA256SUMS.asc` and the SBOM
+      `SHA256SUMS.asc`, the public key and the SBOM
 - [ ] Publish the release only when every asset is attached: immutable
       releases forbid changing assets after publication
 

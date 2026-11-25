@@ -22,7 +22,8 @@ ok() { echo "[ok] $*"; }
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 cd "$root"
 version="$(tr -d ' \t\r\n' < VERSION)"
-tag="${FUZZMUSTER_RELEASE_TAG:-v$version}"
+[[ -n "${FUZZMUSTER_RELEASE_TAG:-}" ]] || die 'FUZZMUSTER_RELEASE_TAG=vX.Y.Z is required; it is never derived from VERSION'
+tag="$FUZZMUSTER_RELEASE_TAG"
 [[ "$tag" == "v$version" ]] || die "release tag $tag does not match VERSION $version"
 
 [[ -z "$(git status --porcelain)" ]] || die 'working tree is not clean'

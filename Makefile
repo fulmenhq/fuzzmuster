@@ -202,10 +202,10 @@ build-all: verify-embedded-identity ## Build every release platform into bin/ wi
 package: build-all ## Package release archives and SHA256SUMS into dist/release (no signing)
 	@BINARY_NAME=$(BINARY_NAME) scripts/package-artifacts.sh
 
-package-sign: build-all ## Package and detach-sign SHA256SUMS with gpg (SIGNING_KEY_ID)
+package-sign: build-all ## Package and sign SHA256SUMS with the committed pin (maintainer; fails closed)
 	@SIGN=1 BINARY_NAME=$(BINARY_NAME) scripts/package-artifacts.sh
 
-verify-release-key: ## Check the exported public key holds no private material
+verify-release-key: ## Check the published key file is one public key block with no secret material
 	@scripts/verify-public-key.sh dist/release/$(BINARY_NAME)-release-signing-key.asc
 
 # --- Supply chain and public content -----------------------------------------

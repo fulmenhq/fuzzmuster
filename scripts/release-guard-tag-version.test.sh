@@ -44,7 +44,8 @@ expect_fail() {
     fi
 }
 
-run_guard ./guard.sh > /dev/null
+expect_fail run_guard ./guard.sh
+expect_fail run_guard FUZZMUSTER_RELEASE_TAG= ./guard.sh
 run_guard FUZZMUSTER_RELEASE_TAG=v1.2.3 ./guard.sh > /dev/null
 for invalid in 1.2.3 vv1.2.3 "v1.2.3 " v1.2.3-rc.1 v1.2.3+build; do
     expect_fail run_guard FUZZMUSTER_RELEASE_TAG="$invalid" ./guard.sh

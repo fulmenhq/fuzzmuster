@@ -33,7 +33,12 @@ main() {
         exit 1
     fi
     expected="v${version}"
-    tag="${FUZZMUSTER_RELEASE_TAG:-$expected}"
+    # The tag is always an explicit input; it is never derived from VERSION.
+    if [[ -z "${FUZZMUSTER_RELEASE_TAG:-}" ]]; then
+        echo "error: FUZZMUSTER_RELEASE_TAG=vX.Y.Z is required" >&2
+        exit 1
+    fi
+    tag="$FUZZMUSTER_RELEASE_TAG"
     require_tag="${FUZZMUSTER_REQUIRE_TAG:-0}"
 
     if [[ ! "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then

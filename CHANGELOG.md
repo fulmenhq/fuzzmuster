@@ -8,6 +8,11 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Release-artifact signing that fails closed and is bound to the committed
+  signing pin; whole-file public-key validation; an import-parsing cgo check
+  and a refusal of `replace` directives in the dependency gate; the release
+  tag is always an explicit input.
+
 - Go module and `fuzzmuster` binary on the Fulmen microtool structure.
 - `version` with `--extended` and `--format json`
   (`schemas/fuzzmuster/v0/version.schema.json`), `envinfo`, and `doctor`

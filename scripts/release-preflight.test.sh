@@ -102,8 +102,23 @@ export PATH="$scratch/bin:$PATH" FIXTURE_LOG="$scratch/calls.log"
 
 run() {
     : > "$FIXTURE_LOG"
-    (cd "$repo" && "$@" ./scripts/release-preflight.sh) > "$scratch/out" 2>&1
+    (cd "$repo" && FUZZMUSTER_RELEASE_TAG="${FUZZMUSTER_RELEASE_TAG-v1.2.3}" "$@" ./scripts/release-preflight.sh) > "$scratch/out" 2>&1
 }
+
+# The tag is an explicit input: unset or empty fails before any gate runs.
+for unset_form in "env -u FUZZMUSTER_RELEASE_TAG" "env FUZZMUSTER_RELEASE_TAG="; do
+    : > "$FIXTURE_LOG"
+    # shellcheck disable=SC2086
+    if (cd "$repo" && $unset_form FIXTURE_CHECK=pass ./scripts/release-preflight.sh) > "$scratch/out" 2>&1; then
+        echo "error: preflight passed with $unset_form" >&2
+        exit 1
+    fi
+    grep -q 'FUZZMUSTER_RELEASE_TAG=vX.Y.Z is required' "$scratch/out"
+    [[ ! -s "$FIXTURE_LOG" ]] || {
+        echo "error: a gate ran without an explicit tag ($unset_form)" >&2
+        exit 1
+    }
+done
 
 # Final gate passes: preflight completes and check was the terminal call.
 run env FIXTURE_CHECK=pass || {

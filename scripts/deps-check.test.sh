@@ -48,6 +48,22 @@ fresh
 printf '//go:build fuzzmusternever\n\npackage buildinfo\n\nimport "C"\n' > "$scratch/repo/internal/buildinfo/zz_cgo.go"
 refuse 'build-tagged import "C"' 'imports "C"'
 
+for form in 'import /* comment */ "C"' 'import c "C"' 'import _ "C"' 'import . "C"' 'import ("fmt"; "C")' 'import ( "fmt"; c "C" )'; do
+    fresh
+    printf 'package buildinfo\n\n%s\n' "$form" > "$scratch/repo/internal/buildinfo/zz_cgo.go"
+    refuse "cgo import form: $form" 'imports "C"'
+done
+
+fresh
+printf '//go:build ignore\n\npackage buildinfo\n\nimport /* x */ "C"\n' > "$scratch/repo/internal/buildinfo/zz_cgo.go"
+refuse 'ignored-build file importing "C"' 'imports "C"'
+
+fresh
+mkdir -p "$scratch/fork"
+printf 'module github.com/spf13/pflag\n\ngo 1.21\n' > "$scratch/fork/go.mod"
+(cd "$scratch/repo" && GOWORK=off "${GO:-go}" mod edit -replace "github.com/spf13/pflag=$scratch/fork")
+refuse 'replace directive' 'replace directives are not allowed'
+
 fresh
 sed -i.bak '/spf13\/pflag/d' "$scratch/repo/config/dependencies.txt"
 rm "$scratch/repo/config/dependencies.txt.bak"

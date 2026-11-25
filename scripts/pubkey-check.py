@@ -17,13 +17,18 @@ unless every byte is accounted for:
   material; each signature is version 4 with exactly its subpackets and
   signature values; subpackets are an allowlist with length caps; notations
   are only GnuPG's own short ones (manu, salt); an embedded signature is
-  checked by the same rules; user IDs are short printable UTF-8.
+  checked by the same rules; user IDs are short ASCII of the form
+  Name <email> (at most 64 bytes, no base64 symbols).
 
 Threat model: this guards against secret key material reaching a published
 file by mistake (a secret export, a concatenation, a stray file) or by simple
-concealment in free-form fields. It is not a proof against a key holder who
-deliberately spreads key material across many permitted fields; such a person
-already holds the key.
+concealment in one free-form field: no field it permits can hold an encoded
+secret key packet. It cannot rule out deliberate steganography by the key
+holder. A valid public key always carries some opaque bytes (for example
+GnuPG's 32-byte random salt notation, signature values) that could hold a
+key seed, and only the holder can put a seed there; whoever can craft the
+pin already holds the key. The pin is a reviewed, fingerprint-anchored
+trust file.
 """
 
 import base64
@@ -32,7 +37,14 @@ import re
 import sys
 
 MAX_FILE = 64 * 1024
-MAX_UID = 128
+MAX_UID = 64
+# Name <email> or Name (comment) <email>: letters, digits, spaces and common
+# name punctuation; no base64 symbols. With the 64-byte cap, no user ID can
+# hold an encoded secret key packet (an unencrypted Ed25519 one is 90 bytes).
+UID = re.compile(
+    r"[A-Za-z0-9][A-Za-z0-9 .,'-]{0,39}( \([A-Za-z0-9][A-Za-z0-9 .,'-]{0,23}\))? "
+    r"<[a-z0-9][a-z0-9._-]{0,31}@[a-z0-9-]+(\.[a-z0-9-]+)+>"
+)
 NOTATION_NAMES = {b"manu", b"salt@notations.gnupg.org"}
 NOTATION_MAX_VALUE = 32
 # subpacket type -> maximum data length (excluding the type octet)
@@ -181,12 +193,12 @@ def check_signature(body, what="signature"):
 
 
 def check_uid(body):
-    need(1 <= len(body) <= MAX_UID, "a user ID that is empty or longer than 128 bytes")
+    need(1 <= len(body) <= MAX_UID, "a user ID that is empty or longer than 64 bytes")
     try:
-        text = body.decode("utf-8")
+        text = body.decode("ascii")
     except UnicodeDecodeError:
-        raise Refused("a user ID that is not UTF-8")
-    need(text.isprintable(), "a user ID that is not printable text")
+        raise Refused("a user ID that is not plain ASCII")
+    need(UID.fullmatch(text), "a user ID that is not of the form Name <email>")
 
 
 def packets(raw):

@@ -170,8 +170,9 @@ tagged version and commit.
       step. Output in `dist/release/`: one archive per release platform,
       `SHA256SUMS`, `SHA256SUMS.asc` and the public key.
 - [ ] Re-check the published key file: `make verify-release-key`. It
-      accepts only GnuPG's own byte-for-byte export of public keys, with short
-      printable user IDs and standard signature subpackets; a pin exported by
+      accepts only GnuPG's own byte-for-byte export of version 4 public
+      keys, with `Name <email>` user IDs of at most 64 bytes and standard
+      signature subpackets (see the threat model in `scripts/pubkey-check.py`); a pin exported by
       a different GnuPG version may be refused (fail closed) and must then be
       re-exported and re-reviewed.
 - [ ] Generate the SBOM: `make dependencies` (`sbom/fuzzmuster.cdx.json`)

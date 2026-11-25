@@ -206,6 +206,31 @@ for algo in ed25519 rsa3072; do
     accept "$scratch/release-$algo.asc"
     gpgconf --homedir "$h" --kill all > /dev/null 2>&1 || true
 done
+# A user ID that is the base64 of a secret key packet (printable, fits the
+# old 128-byte cap) is refused.
+h5="$scratch/gnupg5"
+mkdir -m 700 "$h5"
+gpg --homedir "$h5" --batch --pinentry-mode loopback --passphrase '' \
+    --quick-gen-key 'Fixture <fixture@example.invalid>' ed25519 sign never > /dev/null 2>&1
+f5="$(gpg --homedir "$h5" --with-colons --list-keys 2> /dev/null | awk -F: '$1=="fpr" {print $10; exit}')"
+seckey_b64="$(gpg --homedir "$h5" --batch --pinentry-mode loopback --passphrase '' --export-secret-keys "$f5" 2> /dev/null |
+    head -c 90 | base64 | tr -d '\n')"
+gpg --homedir "$h5" --batch --pinentry-mode loopback --passphrase '' --quick-add-uid "$f5" "$seckey_b64" > /dev/null 2>&1 || true
+gpg --homedir "$h5" --armor --export "$f5" > "$scratch/b64uid.asc" 2> /dev/null
+gpg --homedir "$h5" --with-colons --list-keys 2> /dev/null | grep -q '^uid:.*:[A-Za-z0-9+/=]\{100,\}:' || {
+    echo 'error: fixture did not add the base64 user ID' >&2
+    exit 1
+}
+WANT="user ID" refuse "$check" "$scratch/b64uid.asc"
+gpgconf --homedir "$h5" --kill all > /dev/null 2>&1 || true
+# An estate-style user ID with a leading digit passes.
+h6="$scratch/gnupg6"
+mkdir -m 700 "$h6"
+gpg --homedir "$h6" --batch --pinentry-mode loopback --passphrase '' \
+    --quick-gen-key '3leaps Release Fixture <release@example.invalid>' ed25519 cert never > /dev/null 2>&1
+gpg --homedir "$h6" --armor --export > "$scratch/digituid.asc" 2> /dev/null
+accept "$scratch/digituid.asc"
+gpgconf --homedir "$h6" --kill all > /dev/null 2>&1 || true
 : > "$scratch/empty.asc"
 refuse "$check" "$scratch/empty.asc"
 # gpg missing: a PATH with only python3 and core tools, no gpg.

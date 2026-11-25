@@ -13,7 +13,7 @@ check="$root/scripts/verify-public-key.sh"
 scratch="$(mktemp -d)"
 home="$scratch/gnupg"
 mkdir -m 700 "$home"
-trap 'for h in "$home" "$scratch/gnupg2" "$scratch/gnupg3"; do gpgconf --homedir "$h" --kill all > /dev/null 2>&1 || true; done; rm -rf "$scratch"' EXIT
+trap 'for h in "$home" "$scratch/gnupg2" "$scratch/gnupg3" "$scratch/gnupg4"; do gpgconf --homedir "$h" --kill all > /dev/null 2>&1 || true; done; rm -rf "$scratch"' EXIT
 g() { gpg --homedir "$home" --batch --pinentry-mode loopback --passphrase '' "$@"; }
 g --quick-gen-key 'Fixture <fixture@example.invalid>' ed25519 sign never > /dev/null 2>&1
 fpr="$(g --with-colons --list-keys | awk -F: '$1=="fpr" {print $10; exit}')"
@@ -152,6 +152,60 @@ gpg --homedir "$h3" --batch --pinentry-mode loopback --passphrase '' \
     --quick-add-uid "$f3" "Fixture $(printf 'A%.0s' $(seq 1 200)) <fixture@example.invalid>" > /dev/null 2>&1
 gpg --homedir "$h3" --armor --export "$f3" > "$scratch/longuid.asc" 2> /dev/null
 WANT="user ID" refuse "$check" "$scratch/longuid.asc"
+# Armor headers (here carrying base64 of a secret export) are refused.
+{
+    echo '-----BEGIN PGP PUBLIC KEY BLOCK-----'
+    base64 < "$scratch/sec.bin" | tr -d '\n' | fold -w 60 | sed 's/^/Comment: /'
+    echo
+    sed '1,/^$/d' "$scratch/rearmored.asc"
+} > "$scratch/headers.asc"
+WANT="armor headers" refuse "$check" "$scratch/headers.asc"
+# A notation whose value imitates GnuPG's listing text is still a notation.
+h4="$scratch/gnupg4"
+f4="$(fresh_key "$h4")"
+gpg --homedir "$h4" --batch --pinentry-mode loopback --passphrase '' \
+    --cert-notation 'x@example.invalid=a subpkt 2 len 4 b' --quick-add-uid "$f4" 'Second <second@example.invalid>' > /dev/null 2>&1
+gpg --homedir "$h4" --armor --export "$f4" > "$scratch/forged.asc" 2> /dev/null
+WANT="notation" refuse "$check" "$scratch/forged.asc"
+# A short user ID of non-printable bytes.
+"${PYTHON:-python3}" -I -B - "$scratch" << 'PY'
+import sys
+S = sys.argv[1]
+raw = open(f"{S}/pub.bin", "rb").read()
+p, out = 0, b""
+while p < len(raw):
+    c = raw[p]
+    t = c & 0x3F if c & 0x40 else (c >> 2) & 15
+    if c & 0x40:
+        o = raw[p + 1]
+        if o < 192: n, h = o, 2
+        elif o < 224: n, h = ((o - 192) << 8) + raw[p + 2] + 192, 3
+        else: n, h = int.from_bytes(raw[p + 2:p + 6], "big"), 6
+    else:
+        k = (1, 2, 4)[c & 3]
+        n, h = int.from_bytes(raw[p + 1:p + 1 + k], "big"), 1 + k
+    body = raw[p + h:p + h + n]
+    if t == 13:
+        body = bytes(range(1, 33))
+    out += bytes([0xC0 | t, 255]) + len(body).to_bytes(4, "big") + body
+    p += h + n
+open(f"{S}/ctrluid.bin", "wb").write(out)
+PY
+armor "$scratch/ctrluid.asc" "$scratch/ctrluid.bin"
+WANT="user ID" refuse "$check" "$scratch/ctrluid.asc"
+# Realistic release keys pass: a primary with a signing subkey (embedded
+# back-signature), for Ed25519 and for RSA.
+for algo in ed25519 rsa3072; do
+    h="$scratch/gnupg-$algo"
+    mkdir -m 700 "$h"
+    gpg --homedir "$h" --batch --pinentry-mode loopback --passphrase '' \
+        --quick-gen-key 'Release Fixture <release@example.invalid>' "$algo" cert never > /dev/null 2>&1
+    pf="$(gpg --homedir "$h" --with-colons --list-keys 2> /dev/null | awk -F: '$1=="fpr" {print $10; exit}')"
+    gpg --homedir "$h" --batch --pinentry-mode loopback --passphrase '' --quick-add-key "$pf" "$algo" sign 2y > /dev/null 2>&1
+    gpg --homedir "$h" --armor --export "$pf" > "$scratch/release-$algo.asc" 2> /dev/null
+    accept "$scratch/release-$algo.asc"
+    gpgconf --homedir "$h" --kill all > /dev/null 2>&1 || true
+done
 : > "$scratch/empty.asc"
 refuse "$check" "$scratch/empty.asc"
 # gpg missing: a PATH with only python3 and core tools, no gpg.

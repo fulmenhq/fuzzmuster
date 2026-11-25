@@ -63,4 +63,5 @@ shown="$(gpg --homedir "$verify_tmp" --batch --with-colons --show-keys "$pin" 2>
 gpg --homedir "$verify_tmp" --batch --show-keys \
     --fingerprint --with-subkey-fingerprint "$pin" || stop 'isolated public GPG display failed'
 "$RELEASE_DECERNOR_BIN" scan docs/security --fail-on unsafe || stop 'public pin scan failed'
+"$root/scripts/verify-public-key.sh" "$pin" > /dev/null || stop 'public pin failed the public-key structural check'
 echo '[ok] Public signing pin validated; inspect displayed expiry and revocation before proceeding'

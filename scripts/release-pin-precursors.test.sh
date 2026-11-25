@@ -21,7 +21,7 @@ mkdir -p "$fixture/repo/scripts" "$fixture/repo/docs" "$fixture/repo/schemas" "$
 chmod 700 "$fixture/home" "$fixture/other-home" "$fixture/other-home/.gnupg"
 cp "$root/Makefile" "$root/VERSION" "$fixture/repo/"
 cp "$root/schemas/fingerprint-record.v0.schema.json" "$fixture/repo/schemas/"
-cp "$root/scripts/"{release-decernor.sh,release-export-pin.sh,release-validate-pin.sh,release-insert-anchors.sh,install-release-anchors.sh,release-verify-committed-anchors.sh,validate-release-anchors.sh} "$fixture/repo/scripts/"
+cp "$root/scripts/"{release-decernor.sh,release-export-pin.sh,release-validate-pin.sh,release-insert-anchors.sh,install-release-anchors.sh,release-verify-committed-anchors.sh,validate-release-anchors.sh,verify-public-key.sh,pubkey-check.py} "$fixture/repo/scripts/"
 if [[ -z "${FUZZMUSTER_DECERNOR_BIN:-}" ]]; then
     if [[ "${CI:-}" == true ]]; then
         echo 'error: FUZZMUSTER_DECERNOR_BIN required in CI' >&2

@@ -21,14 +21,20 @@ unless every byte is accounted for:
   Name <email> (at most 64 bytes, no base64 symbols).
 
 Threat model: this guards against secret key material reaching a published
-file by mistake (a secret export, a concatenation, a stray file) or by simple
-concealment in one free-form field: no field it permits can hold an encoded
-secret key packet. It cannot rule out deliberate steganography by the key
-holder. A valid public key always carries some opaque bytes (for example
-GnuPG's 32-byte random salt notation, signature values) that could hold a
-key seed, and only the holder can put a seed there; whoever can craft the
-pin already holds the key. The pin is a reviewed, fingerprint-anchored
-trust file.
+file by mistake: a secret-key packet, a second block, trailing bytes, armor
+headers or non-canonical armor are refused. A user ID (at most 64 bytes), a
+notation value (at most 32 bytes), Ed25519 or X25519 public material (32
+bytes) and an Ed25519 signature value (64 bytes) are each too small for the
+smallest unencrypted secret-key packet (75 bytes). MPIs (RSA, DSA, ECDSA,
+legacy EdDSA) and an embedded signature subpacket are not capped below the
+file limit and can carry one; this script accepts such a file, and the
+byte-for-byte GnuPG re-export in verify-public-key.sh is what refuses it
+when GnuPG does not keep that material. That is GnuPG's handling, not a
+size limit. Deliberate steganography by the key holder is out of scope: a
+seed in the 32-byte salt notation, in a signature value, or in other opaque
+bytes the holder signs cannot be excluded by any checker, and whoever can
+craft the pin already holds the key. The pin is a reviewed,
+fingerprint-anchored trust file.
 """
 
 import base64
@@ -39,8 +45,8 @@ import sys
 MAX_FILE = 64 * 1024
 MAX_UID = 64
 # Name <email> or Name (comment) <email>: letters, digits, spaces and common
-# name punctuation; no base64 symbols. With the 64-byte cap, no user ID can
-# hold an encoded secret key packet (an unencrypted Ed25519 one is 90 bytes).
+# name punctuation; no base64 symbols. At most 64 bytes: smaller than the
+# smallest unencrypted secret-key packet (75 bytes).
 UID = re.compile(
     r"[A-Za-z0-9][A-Za-z0-9 .,'-]{0,39}( \([A-Za-z0-9][A-Za-z0-9 .,'-]{0,23}\))? "
     r"<[a-z0-9][a-z0-9._-]{0,31}@[a-z0-9-]+(\.[a-z0-9-]+)+>"

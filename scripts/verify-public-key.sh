@@ -11,8 +11,7 @@
 # the public keys it imports. A missing gpg or python3 is a refusal. Exit 0
 # means safe to publish; any other exit means do not.
 #
-# Threat model: secret key material reaching a published file by mistake or
-# by simple concealment. See scripts/pubkey-check.py.
+# Threat model and its limits: see scripts/pubkey-check.py.
 set -euo pipefail
 
 die() {

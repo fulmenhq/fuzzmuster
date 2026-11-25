@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # Controls for verify-public-key.sh with a throwaway key: a public export
-# passes; an armored secret export, a public export followed by a binary or
-# armored secret export, trailing junk, two public blocks and a missing gpg
-# are each refused. Needs gpg and python3; makes no network calls.
+# (gpg's armor or a canonical re-armor) passes; an armored secret export, a
+# public export followed by a binary or armored secret export, secret bytes
+# carried inside one public block (as secret, literal-data or experimental
+# packets), extra data after the checksum, a wrong checksum, trailing junk,
+# two public blocks and a missing gpg are each refused. Needs gpg and python3; makes no network calls.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
 check="$root/scripts/verify-public-key.sh"
@@ -30,7 +32,7 @@ refuse() {
         echo "error: accepted: $*" >&2
         exit 1
     fi
-    grep -q 'DO NOT PUBLISH' "$scratch/err" || {
+    grep -q "DO NOT PUBLISH" "$scratch/err" && { [[ -z "${WANT:-}" ]] || grep -q -- "$WANT" "$scratch/err"; } || {
         echo "error: refused without the publish warning: $*" >&2
         cat "$scratch/err" >&2
         exit 1
@@ -50,6 +52,46 @@ refuse "$check" "$scratch/two.asc"
     printf 'trailing text\n'
 } > "$scratch/trail.asc"
 refuse "$check" "$scratch/trail.asc"
+# Re-armor helper: canonical armor (with a correct CRC24) around raw bytes.
+armor() {
+    "${PYTHON:-python3}" -I -B - "$@" << 'PY'
+import base64, sys
+raw = b"".join(open(f, "rb").read() for f in sys.argv[2:])
+def crc24(buf):
+    c = 0xB704CE
+    for b in buf:
+        c ^= b << 16
+        for _ in range(8):
+            c <<= 1
+            if c & 0x1000000:
+                c ^= 0x1864CFB
+    return c & 0xFFFFFF
+b64 = base64.b64encode(raw).decode()
+body = "\n".join(b64[i:i + 64] for i in range(0, len(b64), 64))
+crc = base64.b64encode(crc24(raw).to_bytes(3, "big")).decode()
+open(sys.argv[1], "w").write("-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n" + body + "\n=" + crc + "\n-----END PGP PUBLIC KEY BLOCK-----\n")
+PY
+}
+# new-format packet: tag byte, 4-byte length, body
+packet() {
+    "${PYTHON:-python3}" -I -B -c 'import sys; t=int(sys.argv[1]); b=open(sys.argv[2],"rb").read(); sys.stdout.buffer.write(bytes([0xC0|t,255])+len(b).to_bytes(4,"big")+b)' "$1" "$2"
+}
+g --export "$fpr" > "$scratch/pub.bin" 2> /dev/null
+armor "$scratch/rearmored.asc" "$scratch/pub.bin"
+accept "$scratch/rearmored.asc"
+packet 11 "$scratch/sec.bin" > "$scratch/literal.bin"
+armor "$scratch/pub+literal.asc" "$scratch/pub.bin" "$scratch/literal.bin"
+WANT="packet type 11" refuse "$check" "$scratch/pub+literal.asc"
+packet 62 "$scratch/sec.bin" > "$scratch/exp.bin"
+armor "$scratch/pub+exp.asc" "$scratch/pub.bin" "$scratch/exp.bin"
+WANT="packet type 62" refuse "$check" "$scratch/pub+exp.asc"
+armor "$scratch/pub+secpkt.asc" "$scratch/pub.bin" "$scratch/sec.bin"
+WANT="packet type 5" refuse "$check" "$scratch/pub+secpkt.asc"
+# extra base64 after the checksum line, and a wrong checksum
+sed 's/^\(=.*\)$/\1\nQUFBQQ==/' "$scratch/rearmored.asc" > "$scratch/after-crc.asc"
+refuse "$check" "$scratch/after-crc.asc"
+sed 's/^=.*$/=AAAA/' "$scratch/rearmored.asc" > "$scratch/bad-crc.asc"
+WANT="checksum" refuse "$check" "$scratch/bad-crc.asc"
 : > "$scratch/empty.asc"
 refuse "$check" "$scratch/empty.asc"
 # gpg missing: a PATH with only python3 and core tools, no gpg.

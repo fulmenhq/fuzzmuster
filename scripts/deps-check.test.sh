@@ -65,6 +65,12 @@ printf 'module github.com/spf13/pflag\n\ngo 1.21\n' > "$scratch/fork/go.mod"
 refuse 'replace directive' 'replace directives are not allowed'
 
 fresh
+mkdir -p "$scratch/repo/tmp/evil-pflag"
+printf 'module github.com/spf13/pflag\n\ngo 1.21\n' > "$scratch/repo/tmp/evil-pflag/go.mod"
+printf 'go 1.26.9\n\nuse .\n\nreplace github.com/spf13/pflag => ./tmp/evil-pflag\n' > "$scratch/repo/go.work"
+refuse 'ignored go.work replace' 'a Go workspace applies'
+
+fresh
 sed -i.bak '/spf13\/pflag/d' "$scratch/repo/config/dependencies.txt"
 rm "$scratch/repo/config/dependencies.txt.bak"
 refuse 'unlisted module' 'not in config/dependencies.txt'

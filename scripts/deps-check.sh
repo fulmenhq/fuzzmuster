@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # Dependency rule for the shipped binary and library:
 #   1. no cgo: no Go file imports "C", in any form or under any build tag;
-#   2. no replace directive in go.mod;
+#   2. no replace directive in go.mod, and no Go workspace (go.work) applies;
 #   3. every module in the build graph of every supported platform is listed,
 #      with its licence, in config/dependencies.txt.
 # Usage: deps-check.sh [ROOT]
@@ -22,7 +22,14 @@ while IFS= read -r -d '' f; do go_files+=("$f"); done < <(git ls-files -z --cach
 "$gatecheck" cgo "${go_files[@]}" || fail=1
 
 # 2. No replace directives: a replace builds other code under a listed path.
+#    That covers go.mod and any go.work a build would pick up; the Makefile
+#    also builds with GOWORK=off.
 GOWORK=off "$GO" mod edit -json | "$gatecheck" replace || fail=1
+workspace="$(env -u GOWORK "$GO" env GOWORK)"
+if [[ -n "$workspace" && "$workspace" != off ]]; then
+    echo "error: a Go workspace applies to this module ($workspace); remove it, builds use GOWORK=off" >&2
+    fail=1
+fi
 
 # 3. Modules. Collect the build graph on each release platform.
 allowed="$(awk '!/^#/ && NF { print $1 }' config/dependencies.txt | sort -u)"

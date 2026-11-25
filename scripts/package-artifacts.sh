@@ -120,9 +120,16 @@ case "${SIGN:-0}" in
             echo "error: SHA256SUMS.asc does not verify against the committed pin" >&2
             exit 1
         }
+        # Exactly one valid signature, made by the committed signing subkey
+        # of the pinned primary key.
+        [[ "$(grep -c '^\[GNUPG:\] VALIDSIG ' <<< "$status")" == 1 ]] || {
+            echo "error: SHA256SUMS.asc must carry exactly one valid signature" >&2
+            exit 1
+        }
+        signer="$(awk '$2=="VALIDSIG" {print $3}' <<< "$status")"
         primary="$(awk '$2=="VALIDSIG" {print $12}' <<< "$status")"
-        [[ "$primary" == "$FUZZMUSTER_GPG_SIGNING_FINGERPRINT" ]] || {
-            echo "error: SHA256SUMS.asc is not signed by the pinned primary key" >&2
+        [[ "$signer" == "${FUZZMUSTER_PGP_KEY_ID%!}" && "$primary" == "$FUZZMUSTER_GPG_SIGNING_FINGERPRINT" ]] || {
+            echo "error: SHA256SUMS.asc is not signed by the committed signing subkey of the pinned key" >&2
             exit 1
         }
         tag_discard_verify_home

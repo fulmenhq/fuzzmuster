@@ -25,8 +25,10 @@ export PYTHON
 # No cgo, ever: the shipped binary and library are pure Go. `:=` (not `?=`)
 # because the goneat-tools-runner image exports CGO_ENABLED=1.
 export CGO_ENABLED := 0
-# Never fetch a toolchain behind the caller's back.
+# Never fetch a toolchain behind the caller's back, and never let a Go
+# workspace (go.work) substitute modules.
 export GOTOOLCHAIN := local
+export GOWORK := off
 
 # Release platforms: the ones CI builds and tests natively.
 RELEASE_PLATFORMS := linux/amd64 linux/arm64 darwin/arm64 windows/amd64 windows/arm64

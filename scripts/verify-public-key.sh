@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# From forge-microtool-gimlet scripts/verify-public-key.sh.
+# From the Fulmen Go microtool template (scripts/verify-public-key.sh).
 # verify-public-key.sh - Verify GPG key file contains ONLY public key material
 # Usage: ./scripts/verify-public-key.sh <key-file>
 # Exit codes:

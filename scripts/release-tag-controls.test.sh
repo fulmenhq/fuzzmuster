@@ -97,7 +97,7 @@ printf 'Release 1.2.3\n\nMissing footer.\n' > "$scratch/v1.2.3/v1.2.3.txt"
 expect_fail tag_message_file
 printf 'Release 9.9.9\n\nMismatched subject version.\n\nRole: devlead\nCo-authored-by: Example Model <noreply@3leaps.net>\nCommitter-of-Record: @3leapsdave\n' > "$scratch/v1.2.3/v1.2.3.txt"
 expect_fail tag_message_file
-printf 'Release 1.2.3\n\nForbidden footer domain.\n\nRole: devlead\nCo-authored-by: Example Model <noreply@3leaps.dev>\nCommitter-of-Record: @3leapsdave\n' > "$scratch/v1.2.3/v1.2.3.txt"
+printf 'Release 1.2.3\n\nForbidden footer domain.\n\nRole: devlead\nCo-authored-by: Example Model <noreply@example.invalid>\nCommitter-of-Record: @3leapsdave\n' > "$scratch/v1.2.3/v1.2.3.txt"
 expect_fail tag_message_file
 printf '%s' "$valid_msg" > "$scratch/v1.2.3/v1.2.3.txt"
 expect_fail env FUZZMUSTER_TAGGER_NAME=$'bad\nname' bash -c 'source "$1"; tag_root="$2"; tag_identity' _ "$root/scripts/release-tag-common.sh" "$id_root"

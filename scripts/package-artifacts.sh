@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# Ported from forge-microtool-gimlet scripts/package-artifacts.sh.
+# From the Fulmen Go microtool template (scripts/package-artifacts.sh).
 set -euo pipefail
 
 # Package release artifacts for fuzzmuster.

@@ -1,6 +1,6 @@
 # fuzzmuster: plan, run and verify fuzz campaigns over native fuzzing engines.
 #
-# Structure follows the Fulmen microtool template (forge-microtool-gimlet).
+# Structure follows the Fulmen Go microtool template.
 # `make check` is everything the Linux CI cells run; `make check-platform` is
 # the subset the native macOS and Windows cells run (no goneat required).
 
@@ -12,7 +12,7 @@ BINARY_EXT :=
 ifeq ($(OS),Windows_NT)
 	BINARY_EXT := .exe
 endif
-VERSION := $(shell tr -d ' \t\r\n' < VERSION 2>/dev/null || echo dev)
+VERSION := $(or $(shell tr -d ' \t\r\n' < VERSION 2>/dev/null),dev)
 COMMIT := $(or $(shell git rev-parse --verify -q HEAD 2>/dev/null),unknown)
 # The commit time, not the wall clock, so a rebuild of a commit is identical.
 BUILD_DATE := $(or $(shell git log -1 --format=%cI 2>/dev/null),unknown)

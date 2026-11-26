@@ -1,0 +1,192 @@
+# fuzzmuster CI
+#
+# Linux cells (x86_64 and aarch64) run `make check` inside the digest-pinned
+# goneat-tools-runner-glibc image, which provides Go, goneat, actionlint and
+# Python. Native macOS and Windows cells run `make check-platform` through
+# .github/actions/make-check, which installs the pinned Go and Python only.
+# Every cell builds with cgo off, runs the tests and smoke-runs the binary.
+#
+# Hosted (every push and PR):
+#   ubuntu-latest   linux/amd64    (goneat-tools-runner-glibc:v0.5.16)
+#   macos-15        darwin/arm64
+#   windows-latest  windows/amd64
+# Organization larger runners (same-repo only, so fork PRs skip these cells
+# and they cannot be required checks):
+#   ubuntu-latest-arm64-s   linux/arm64    (goneat-tools-runner-glibc:v0.5.16)
+#   windows-latest-arm64-s  windows/arm64
+#
+# Actions and container images are pinned by digest or commit. Custom runner
+# labels are declared in .github/actionlint.yaml. CI holds no release,
+# signing or registry authority.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  # The Go toolchain every cell runs; the Linux image provides it and the
+  # native cells install it. Never fetched by the go command itself.
+  GO_TOOLCHAIN: 1.26.11
+  GOTOOLCHAIN: local
+jobs:
+  check-linux:
+    name: check (linux/amd64)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/fulmenhq/goneat-tools-runner-glibc:v0.5.16@sha256:9bd9e41febba7c68ec0e1879fe92afb270a6779e29ea4fdee10fbd24c09e8a10
+      options: --user 1001:1001
+    env:
+      HOME: /github/home
+      # The image's GOPATH is not writable by the CI user (uid 1001).
+      GOPATH: /github/home/gopath
+      GOMODCACHE: /github/home/gomodcache
+      GOCACHE: /github/home/gocache
+      PYTHONUTF8: "1"
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify runner and toolchain
+        run: |
+          set -euo pipefail
+          test "$(id -u):$(id -g)" = "1001:1001"
+          test "$(go env GOOS)/$(go env GOARCH)" = "linux/amd64"
+          go version | grep "^go version go${GO_TOOLCHAIN} "
+          goneat version | grep '^Module: v0\.6\.9$'
+          actionlint --version | head -1
+          python3 --version
+      - name: make check
+        env:
+          GITHUB_TOKEN: ""
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          make check
+      - name: Working tree unchanged by the gate
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+  check-linux-arm64:
+    name: check (linux/arm64)
+    # Same-repo only: fork PRs cannot use organization larger runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest-arm64-s
+    container:
+      image: ghcr.io/fulmenhq/goneat-tools-runner-glibc:v0.5.16@sha256:9bd9e41febba7c68ec0e1879fe92afb270a6779e29ea4fdee10fbd24c09e8a10
+      options: --user 1001:1001
+    env:
+      HOME: /github/home
+      # The image's GOPATH is not writable by the CI user (uid 1001).
+      GOPATH: /github/home/gopath
+      GOMODCACHE: /github/home/gomodcache
+      GOCACHE: /github/home/gocache
+      PYTHONUTF8: "1"
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify runner and toolchain
+        run: |
+          set -euo pipefail
+          test "$(id -u):$(id -g)" = "1001:1001"
+          test "$(go env GOOS)/$(go env GOARCH)" = "linux/arm64"
+          go version | grep "^go version go${GO_TOOLCHAIN} "
+          goneat version | grep '^Module: v0\.6\.9$'
+      - name: make check
+        env:
+          GITHUB_TOKEN: ""
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          make check
+      - name: Working tree unchanged by the gate
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+  check-native:
+    name: check (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            goos: darwin
+            goarch: arm64
+          - runner: windows-latest
+            goos: windows
+            goarch: amd64
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: make check-platform
+        uses: ./.github/actions/make-check
+        with:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          go-toolchain: ${{ env.GO_TOOLCHAIN }}
+  check-native-arm64:
+    name: check (${{ matrix.goos }}/${{ matrix.goarch }})
+    # Same-repo only: fork PRs cannot use organization larger runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest-arm64-s
+            goos: windows
+            goarch: arm64
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: make check-platform
+        uses: ./.github/actions/make-check
+        with:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          go-toolchain: ${{ env.GO_TOOLCHAIN }}
+  workflow-lint:
+    name: workflow-lint
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/fulmenhq/goneat-tools-runner-glibc:v0.5.16@sha256:9bd9e41febba7c68ec0e1879fe92afb270a6779e29ea4fdee10fbd24c09e8a10
+      options: --user 1001:1001
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: actionlint
+        run: |
+          actionlint --version
+          actionlint -color

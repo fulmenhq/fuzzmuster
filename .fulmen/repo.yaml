@@ -1,0 +1,14 @@
+# .fulmen/repo.yaml: what this repo claims to be. Written against the
+# repository-classes standard (unsuffixed toolkit adoption path); verified by
+# manual convention review until the planned repo-declaration schema and
+# checker land.
+schema: "contract:taxonomy/v0/repo-declaration.schema.json"
+# No class: fuzzmuster is an unsuffixed toolkit.
+# No profile: the library is Go only and is not offered in other languages
+# in-process. Other languages use the CLI's JSON output and the schemas.
+category: cli  # equals .fulmen/app.yaml metadata.repository_category
+env_prefix: FUZZMUSTER_
+umbrella_prefix: null
+surfaces: [library, cli]
+target_registries: [go_proxy]
+extensions: []

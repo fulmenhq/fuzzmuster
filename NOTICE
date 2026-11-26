@@ -1,0 +1,29 @@
+fuzzmuster
+Copyright 2026 3 Leaps, LLC
+
+This product includes software developed at 3 Leaps, LLC
+(https://3leaps.net/).
+
+Licensed under either of the MIT License (LICENSE-MIT) or the Apache License,
+Version 2.0 (LICENSE-APACHE), at your option.
+
+Subject to 3 Leaps OSS policies:
+https://github.com/3leaps/oss-policies/tree/dee9d320f5b7045a44c92b200cc1c92ca83ae843
+
+## Project Name Notice
+
+"fuzzmuster" is a project name of 3 Leaps, LLC, used to identify this
+software. "3 Leaps®" is a registered trademark of 3 Leaps, LLC, a North
+Carolina LLC. "Fulmen™", "Fulmens™" and "FulmenHQ™" are trademarks of
+3 Leaps, LLC. Neither license grants any right to use these names or marks.
+
+While code and documentation are open under the MIT or Apache-2.0 License,
+usage of the "fuzzmuster" project name is reserved for official
+implementations to prevent confusion and benefit the ecosystem. Use of this
+name in derivative works does not imply endorsement by 3 Leaps, LLC.
+
+For the benefit of the community, please rename your project folder and
+configurations to avoid using "3leaps", "fulmen" or "fuzzmuster" in
+derivative works that are not official 3 Leaps projects.
+
+For questions regarding project name usage, contact hello@3leaps.net.

@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# Ported from github.com/3leaps/docpresser config/release/limensafe-ci-sha256.txt at 21e0cad.
+# Checksum of the limensafe release binary the surface-scan workflow installs.
+39e76cb14504837327cb0246a06f8fd6cfd2617bad777785fbe4424d32c81a42  limensafe-v0.2.0-linux-amd64

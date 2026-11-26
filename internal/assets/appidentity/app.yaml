@@ -1,0 +1,14 @@
+# Fulmen application identity for the fuzzmuster CLI. This file is the
+# source of truth for the identity embedded in released binaries
+# (internal/assets/appidentity/app.yaml; `make sync-embedded-identity`).
+app:
+  vendor: fulmenhq
+  binary_name: fuzzmuster
+  env_prefix: FUZZMUSTER_
+  config_name: fuzzmuster
+  description: "Plan, run and verify fuzz campaigns over native fuzzing engines"
+  version: "0.1.0"
+metadata:
+  project_url: https://github.com/fulmenhq/fuzzmuster
+  license: MIT OR Apache-2.0
+  repository_category: cli

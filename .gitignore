@@ -1,0 +1,67 @@
+# Build artifacts
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+
+# SBOM artifacts (generated)
+sbom/
+
+# Go workspace
+go.work
+go.work.sum
+
+# Go vendored dependencies
+vendor/
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.local
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Planning files (local only)
+.plans/
+
+# Claude Code local settings
+**/.claude/settings.local.json
+
+# goneat local overrides
+.goneat/tools.local.yaml
+
+# Backstop only. Local agent guidance lives outside the working tree.
+# A gitignore entry is a convenience filter, not a security boundary.
+AGENTS.local.md
+AGENTS.*.local.md
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Logs
+*.log
+logs/
+
+# Python caches from the check scripts
+__pycache__/
+*.pyc

@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# Ported from github.com/3leaps/docpresser config/release/tooling-suites.txt at 21e0cad.
+# Release tooling suites run by make release-tooling-test, one per line.
+license-check
+package-artifacts
+release-decernor
+release-gh
+release-github-preflight
+release-guard-release-surfaces
+release-guard-tag-version
+release-pin-precursors
+release-preflight
+release-prepare-tag-message
+release-tag-controls
+release-tag-operator
+release-verify-committed-anchors
+release-verify-published-tag
+surface-scan
+sync-changelog-links
+verify-pinned-tag
+verify-public-key

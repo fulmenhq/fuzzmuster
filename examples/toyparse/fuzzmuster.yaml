@@ -1,0 +1,40 @@
+# fuzzmuster project file for the synthetic toyparse example.
+version: 0
+project: toyparse
+targets:
+  - name: parse_record
+    adapter: cargo-fuzz
+    path: fuzz
+    entry: parse_record
+    seeds: fuzz/seeds/parse_record
+  - name: parse_stream
+    adapter: cargo-fuzz
+    path: fuzz
+    entry: parse_stream
+    seeds: fuzz/seeds/parse_stream
+  - name: render_record
+    adapter: cargo-fuzz
+    path: fuzz
+    entry: render_record
+    seeds: fuzz/seeds/render_record
+profiles:
+  # Replays the reviewed seeds only. Never mutates; safe in public CI.
+  public:
+    mode: replay
+  # Coverage-guided mutation on a Linux worker with engine-enforced limits.
+  linux-mutate:
+    mode: mutate
+    platform:
+      os: linux
+      arch: amd64
+    toolchain:
+      rust: nightly-2026-11-01
+      sanitizer: address
+    budget:
+      per_target: PT1H
+    requires:
+      - control: engine_input_timeout
+        duration: PT10S
+      - control: engine_rss_limit
+        mebibytes: 1024
+      - control: outputs_outside_worktree

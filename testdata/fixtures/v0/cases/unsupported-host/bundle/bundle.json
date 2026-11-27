@@ -1,0 +1,35 @@
+{
+  "v": 1,
+  "stream": "fuzzmuster.bundle",
+  "record_id": "bundle-68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "revision": 1,
+  "payload_contract": "contract: record-collection/v0",
+  "payload": {
+    "kind": "set",
+    "members": [
+      {
+        "pin": {
+          "stream": "fuzzmuster.campaign",
+          "record_id": "campaign-68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+          "revision": 1,
+          "digest": "sha256:e34919cd4b6330fa001541cf82d4315de8fc71a35ea9f47d1cacab83db42efe2"
+        }
+      }
+    ],
+    "member_count": 1,
+    "closure_claim": "none"
+  },
+  "provenance": {
+    "actor_kind": "process",
+    "actor": "fuzzmuster-collector",
+    "tool": "fuzzmuster 0.0.0-fixture"
+  },
+  "produced_at": {
+    "instant": "2026-11-26T10:00:00.000000Z",
+    "source": "producer_clock"
+  },
+  "classification": {
+    "retention": "standard",
+    "sensitivity": "1-confidential"
+  }
+}

@@ -11,7 +11,9 @@ This repository is at its first step. The binary builds and implements three
 commands: `version` (with `--extended` and `--format json`), `envinfo` and
 `doctor`. `doctor` checks only fuzzmuster's own installation; it does not yet
 check fuzzing toolchains or host controls. The other commands in "What we are
-building" are not implemented yet.
+building" are not implemented yet. The draft formats for the project file,
+plan and result are in [docs/design/records-v0.md](docs/design/records-v0.md),
+with schemas, a synthetic example project and hand-checked fixtures.
 
 ## Why
 

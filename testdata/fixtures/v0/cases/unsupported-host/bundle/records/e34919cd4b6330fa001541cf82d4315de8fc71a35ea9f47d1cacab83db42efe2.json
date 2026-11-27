@@ -1,0 +1,56 @@
+{
+  "v": 1,
+  "stream": "fuzzmuster.campaign",
+  "record_id": "campaign-68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "revision": 1,
+  "payload_contract": "contract: fuzzmuster-campaign/v0",
+  "payload": {
+    "v": 0,
+    "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+    "host_check": {
+      "status": "unsupported",
+      "missing": [
+        {
+          "control": "engine_rss_limit",
+          "mebibytes": 1024
+        }
+      ]
+    },
+    "jobs": [
+      {
+        "job_id": "parse_record",
+        "task_id": "sha256:9209cff1117b96d013db567fd37d75cec450ca98bcbe29a3e921f2b09cbf85aa",
+        "state": "not_started",
+        "reason": "unsupported_host",
+        "budget_reached": false
+      },
+      {
+        "job_id": "parse_stream",
+        "task_id": "sha256:ae0de7dc2766f248f347107f064b7b3d56897401cd7117d07a070a9b52673280",
+        "state": "not_started",
+        "reason": "unsupported_host",
+        "budget_reached": false
+      },
+      {
+        "job_id": "render_record",
+        "task_id": "sha256:ffda0a37acab989fce9772b517d8b312852279beb9bf3e17ab6e97a45b79a158",
+        "state": "not_started",
+        "reason": "unsupported_host",
+        "budget_reached": false
+      }
+    ]
+  },
+  "provenance": {
+    "actor_kind": "process",
+    "actor": "fuzzmuster-collector",
+    "tool": "fuzzmuster 0.0.0-fixture"
+  },
+  "produced_at": {
+    "instant": "2026-11-26T10:00:00.000000Z",
+    "source": "producer_clock"
+  },
+  "classification": {
+    "retention": "standard",
+    "sensitivity": "1-confidential"
+  }
+}

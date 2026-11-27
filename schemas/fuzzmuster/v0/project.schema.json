@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/project.schema.json",
+  "title": "fuzzmuster project file (fuzzmuster.yaml)",
+  "description": "The checked-in project file. Written by hand and reviewed with the code. Worker addresses, credentials and storage locations never appear here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "project",
+    "targets",
+    "profiles"
+  ],
+  "properties": {
+    "version": {
+      "const": 0
+    },
+    "project": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "adapter",
+          "path",
+          "entry"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "adapter": {
+            "enum": [
+              "cargo-fuzz",
+              "go-native"
+            ]
+          },
+          "path": {
+            "$ref": "common.schema.json#/$defs/relPath"
+          },
+          "entry": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+          },
+          "seeds": {
+            "$ref": "common.schema.json#/$defs/relPath"
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 32,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "replay",
+              "mutate"
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+            }
+          },
+          "platform": {
+            "$ref": "common.schema.json#/$defs/platform"
+          },
+          "toolchain": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "rust": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "go": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "sanitizer": {
+                "enum": [
+                  "none",
+                  "address",
+                  "memory",
+                  "undefined",
+                  "thread"
+                ]
+              }
+            }
+          },
+          "budget": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "per_target"
+            ],
+            "properties": {
+              "per_target": {
+                "$ref": "common.schema.json#/$defs/duration"
+              }
+            }
+          },
+          "requires": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "$ref": "common.schema.json#/$defs/control"
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "mode": {
+              "const": "mutate"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "budget"
+          ]
+        },
+        "else": {
+          "not": {
+            "required": [
+              "budget"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "parse_record reports an RSS limit of 4096 MiB; the plan requires 1024 MiB."
+}

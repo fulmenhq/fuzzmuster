@@ -10,6 +10,12 @@ Version 2.0 (LICENSE-APACHE), at your option.
 Subject to 3 Leaps OSS policies:
 https://github.com/3leaps/oss-policies/tree/dee9d320f5b7045a44c92b200cc1c92ca83ae843
 
+## Third-party material
+
+`schemas/third_party/crucible/` holds JSON schemas copied unedited from 3leaps
+Crucible. They are dedicated to the public domain under CC0 1.0 Universal; see
+`LICENSE-CC0` and `PROVENANCE.md` in that directory.
+
 ## Project Name Notice
 
 "fuzzmuster" is a project name of 3 Leaps, LLC, used to identify this

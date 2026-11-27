@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "Two jobs reached their budget, one of them with a crash finding (keep-going mode); the third was abandoned when its host was lost. Valid, incomplete, finding kept."
+}

@@ -1,0 +1,25 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": { "status": "valid", "problems": [], "bodies_withheld": 4 },
+  "completeness": {
+    "status": "complete",
+    "jobs": [
+      { "job_id": "parse_record", "required": true, "state": "succeeded", "reason": "budget_reached", "budget_reached": true, "attempts": 1 },
+      { "job_id": "parse_stream", "required": true, "state": "succeeded", "reason": "budget_reached", "budget_reached": true, "attempts": 1 },
+      { "job_id": "render_record", "required": true, "state": "succeeded", "reason": "budget_reached", "budget_reached": true, "attempts": 2 }
+    ]
+  },
+  "observations": {
+    "status": "reported",
+    "basis": "worker_claim",
+    "finding_count": 0,
+    "findings": [],
+    "jobs": [
+      { "job_id": "parse_record", "attempt_id": "sha256:24f37030fe9c3256c4377178dec6ab26d06765b60da0316b05d5c582dd72eb14", "subject_binary": "sha256:53fbb5141882e657a0190abb79dc924b43c35733170d838f66f341ec92757e4d", "executions": 18400000, "coverage": { "engine": "libfuzzer", "unit": "cov", "value": 437 } },
+      { "job_id": "parse_stream", "attempt_id": "sha256:208a8cf10d09d9c0bfa23b3dc990958c4190cd9a2aac5ab179f1f2a6bf1f1699", "subject_binary": "sha256:3f3e5f22d417ba2331917a7864db73e7341e39097551f6dd19f365f2210990e1", "executions": 11900000, "coverage": { "engine": "libfuzzer", "unit": "cov", "value": 533 } },
+      { "job_id": "render_record", "attempt_id": "sha256:29b7de819e10530b32f5db493220bc9c5e1c7b07a075746ffc58269fab1cfa7b", "subject_binary": "sha256:7f77ca5e9cc8f840fd8407024616ca4171e5924345c9ac9526b1f3dba5c5647d", "executions": 9700000, "coverage": { "engine": "libfuzzer", "unit": "cov", "value": 622 } }
+    ]
+  },
+  "exit_code": 0
+}

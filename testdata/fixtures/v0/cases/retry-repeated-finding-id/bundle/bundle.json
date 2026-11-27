@@ -1,0 +1,67 @@
+{
+  "v": 1,
+  "stream": "fuzzmuster.bundle",
+  "record_id": "bundle-68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "revision": 1,
+  "payload_contract": "contract: record-collection/v0",
+  "payload": {
+    "kind": "set",
+    "members": [
+      {
+        "pin": {
+          "stream": "fuzzmuster.attempt",
+          "record_id": "attempt-208a8cf10d09d9c0bfa23b3dc990958c4190cd9a2aac5ab179f1f2a6bf1f1699",
+          "revision": 1,
+          "digest": "sha256:2514a097c3fa2ab775ffee2a3a7b4226521bdaf6278393fe8a5bc30cad0dba0c"
+        }
+      },
+      {
+        "pin": {
+          "stream": "fuzzmuster.attempt",
+          "record_id": "attempt-2e79fff030d040b067125fd21603d47292a08dd13b692b3c98d6bb8497ddd780",
+          "revision": 1,
+          "digest": "sha256:87cf27855d8fe5541ca6756147305e68ffacd1444ca5920e6fc2db1fdd8ebacb"
+        }
+      },
+      {
+        "pin": {
+          "stream": "fuzzmuster.campaign",
+          "record_id": "campaign-68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+          "revision": 1,
+          "digest": "sha256:899405d206eb9b9747ee320cd87ab16bdfd69bc1562ff2e1b62db60b09391c0c"
+        }
+      },
+      {
+        "pin": {
+          "stream": "fuzzmuster.attempt",
+          "record_id": "attempt-29b7de819e10530b32f5db493220bc9c5e1c7b07a075746ffc58269fab1cfa7b",
+          "revision": 1,
+          "digest": "sha256:a2ba91c7e00dedc2fedc8780bd7efb53c2aed4cdf704baa9ba00f2fe26e9c293"
+        }
+      },
+      {
+        "pin": {
+          "stream": "fuzzmuster.attempt",
+          "record_id": "attempt-24f37030fe9c3256c4377178dec6ab26d06765b60da0316b05d5c582dd72eb14",
+          "revision": 1,
+          "digest": "sha256:bec6438a350a4dac4298e370b599693bbe3fce128251df3f81a72c9fd5237e6b"
+        }
+      }
+    ],
+    "member_count": 5,
+    "closure_claim": "none"
+  },
+  "provenance": {
+    "actor_kind": "process",
+    "actor": "fuzzmuster-collector",
+    "tool": "fuzzmuster 0.0.0-fixture"
+  },
+  "produced_at": {
+    "instant": "2026-11-26T13:32:00.000000Z",
+    "source": "producer_clock"
+  },
+  "classification": {
+    "retention": "standard",
+    "sensitivity": "1-confidential"
+  }
+}

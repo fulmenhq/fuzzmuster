@@ -1,0 +1,13 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": {
+    "status": "invalid",
+    "problems": [
+      { "code": "body_not_encrypted", "job_id": "parse_record", "record_id": "attempt-24f37030fe9c3256c4377178dec6ab26d06765b60da0316b05d5c582dd72eb14" }
+    ]
+  },
+  "completeness": { "status": "not_assessed" },
+  "observations": { "status": "not_assessed" },
+  "exit_code": 63
+}

@@ -1,0 +1,20 @@
+{
+  "v": 0,
+  "entries": [
+    {
+      "path": "empty-value.txt",
+      "digest": "sha256:96a36cea6c5e54242c319d0b353f76decb03ba9358b6ccdf91dea37d828357a7",
+      "length": 2
+    },
+    {
+      "path": "simple.txt",
+      "digest": "sha256:4260b75684c04dfeb6d742c468ac738080cbfc1d1dd532936db382d01630d553",
+      "length": 16
+    },
+    {
+      "path": "three-pairs.txt",
+      "digest": "sha256:1877c05a654609e08f2176480e270ac0ce24baf8d48008a0c47cbd890020c093",
+      "length": 17
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "Every job reached its budget with no finding; one encrypted engine log is bundled."
+}

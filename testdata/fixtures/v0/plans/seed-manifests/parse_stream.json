@@ -1,0 +1,15 @@
+{
+  "v": 0,
+  "entries": [
+    {
+      "path": "blank-lines.txt",
+      "digest": "sha256:354764c9463f427c82a415d3fcc59929838577db8f1622a4d9192af8a267aed2",
+      "length": 6
+    },
+    {
+      "path": "two-records.txt",
+      "digest": "sha256:1fbb797a85875de909e4fad5d1104c6bb6d3639bc5a5527cebd8ff8593ba3aee",
+      "length": 28
+    }
+  ]
+}

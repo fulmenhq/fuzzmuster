@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate-30m.plan.json",
+  "description": "complete-clean verified against a plan with a 30 minute budget per job."
+}

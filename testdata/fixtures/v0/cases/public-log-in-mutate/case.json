@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "complete-clean with the parse_record engine log given public custody and bundled unencrypted; the plan's profile mutates."
+}

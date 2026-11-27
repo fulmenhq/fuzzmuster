@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "complete-clean with the parse_stream corpus manifest referenced without encryption."
+}

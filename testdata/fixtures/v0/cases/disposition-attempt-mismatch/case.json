@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "The campaign reports render_record as succeeded; its cited attempt was abandoned."
+}

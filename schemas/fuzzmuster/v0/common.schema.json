@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/common.schema.json",
+  "title": "fuzzmuster v0 shared definitions",
+  "description": "Definitions shared by the fuzzmuster v0 documents. Digest, instant, body reference and pin come from durable-record/v1; duration from durable-runner/v0.",
+  "$defs": {
+    "digest": {
+      "$ref": "contract:durable-record/v1/record.schema.json#/$defs/digest"
+    },
+    "instant": {
+      "$ref": "contract:durable-record/v1/record.schema.json#/$defs/instant"
+    },
+    "bodyRef": {
+      "$ref": "contract:durable-record/v1/record.schema.json#/$defs/bodyRef"
+    },
+    "encryptedBodyRef": {
+      "description": "A bodyRef for encrypted bytes. The digest, length and media type describe the ciphertext. key_ref names the key-custody record; the key never appears in a bundle.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/bodyRef"
+        },
+        {
+          "required": [
+            "encryption"
+          ]
+        }
+      ]
+    },
+    "pin": {
+      "$ref": "contract:durable-record/v1/record.schema.json#/$defs/pin"
+    },
+    "duration": {
+      "$ref": "contract:durable-runner/v0/task-definition.schema.json#/$defs/duration"
+    },
+    "token": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "relPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$",
+      "description": "Forward-slash path relative to the project root. No leading slash, and no segment starts with a dot, so '.' and '..' cannot appear."
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "engine"
+      ],
+      "properties": {
+        "adapter": {
+          "enum": [
+            "cargo-fuzz",
+            "go-native"
+          ]
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "engine": {
+          "enum": [
+            "libfuzzer",
+            "go-fuzz-native"
+          ]
+        },
+        "toolchain": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "sanitizer": {
+          "enum": [
+            "none",
+            "address",
+            "memory",
+            "undefined",
+            "thread"
+          ]
+        }
+      }
+    },
+    "controlFields": {
+      "description": "Control name and its value. The value field depends on the control. Closed by the documents that use it.",
+      "type": "object",
+      "required": [
+        "control"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "control": {
+              "enum": [
+                "engine_input_timeout",
+                "worker_deadline_kill"
+              ]
+            },
+            "duration": {
+              "$ref": "#/$defs/duration"
+            }
+          },
+          "required": [
+            "duration"
+          ],
+          "not": {
+            "required": [
+              "mebibytes"
+            ]
+          }
+        },
+        {
+          "properties": {
+            "control": {
+              "enum": [
+                "engine_rss_limit",
+                "memory_ceiling"
+              ]
+            },
+            "mebibytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1048576
+            }
+          },
+          "required": [
+            "mebibytes"
+          ],
+          "not": {
+            "required": [
+              "duration"
+            ]
+          }
+        },
+        {
+          "properties": {
+            "control": {
+              "const": "outputs_outside_worktree"
+            }
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "duration"
+                ]
+              },
+              {
+                "required": [
+                  "mebibytes"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "control": {
+          "enum": [
+            "engine_input_timeout",
+            "engine_rss_limit",
+            "memory_ceiling",
+            "worker_deadline_kill",
+            "outputs_outside_worktree"
+          ]
+        },
+        "duration": {
+          "$ref": "#/$defs/duration"
+        },
+        "mebibytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        }
+      }
+    },
+    "control": {
+      "description": "A required control.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/controlFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "limit": {
+      "description": "A control the worker reports as demonstrated, and what enforced it.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/controlFields"
+        }
+      ],
+      "required": [
+        "enforced_by"
+      ],
+      "properties": {
+        "enforced_by": {
+          "enum": [
+            "engine",
+            "kernel",
+            "vm",
+            "supervisor"
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "platformFields": {
+      "type": "object",
+      "required": [
+        "os",
+        "arch"
+      ],
+      "properties": {
+        "os": {
+          "enum": [
+            "linux",
+            "darwin",
+            "windows"
+          ]
+        },
+        "arch": {
+          "enum": [
+            "amd64",
+            "arm64"
+          ]
+        }
+      }
+    },
+    "platform": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/platformFields"
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

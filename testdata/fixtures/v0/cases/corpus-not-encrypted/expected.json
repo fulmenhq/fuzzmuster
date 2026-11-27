@@ -1,0 +1,13 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": {
+    "status": "invalid",
+    "problems": [
+      { "code": "encryption_missing", "job_id": "parse_stream", "record_id": "attempt-208a8cf10d09d9c0bfa23b3dc990958c4190cd9a2aac5ab179f1f2a6bf1f1699" }
+    ]
+  },
+  "completeness": { "status": "not_assessed" },
+  "observations": { "status": "not_assessed" },
+  "exit_code": 63
+}

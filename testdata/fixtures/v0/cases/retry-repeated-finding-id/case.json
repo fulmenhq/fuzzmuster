@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "render_record attempt 1 (abandoned) and attempt 2 (budget reached) each report a finding with the local id render-record-1. Valid, complete, two findings."
+}

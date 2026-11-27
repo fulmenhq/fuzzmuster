@@ -1,0 +1,15 @@
+{
+  "v": 0,
+  "entries": [
+    {
+      "path": "equals-in-value.txt",
+      "digest": "sha256:b9eebc224f03f924400b4c2040592c03698a40887bbbcb0a8e24dd3e0cdbad83",
+      "length": 5
+    },
+    {
+      "path": "simple.txt",
+      "digest": "sha256:4260b75684c04dfeb6d742c468ac738080cbfc1d1dd532936db382d01630d553",
+      "length": 16
+    }
+  ]
+}

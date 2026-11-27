@@ -1,0 +1,13 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": {
+    "status": "invalid",
+    "problems": [
+      { "code": "identity_mismatch", "job_id": "render_record", "record_id": "attempt-a8b654f700235f22553351015f506657a5d4ba58c157f81f62fa5c0f3e702466" }
+    ]
+  },
+  "completeness": { "status": "not_assessed" },
+  "observations": { "status": "not_assessed" },
+  "exit_code": 63
+}

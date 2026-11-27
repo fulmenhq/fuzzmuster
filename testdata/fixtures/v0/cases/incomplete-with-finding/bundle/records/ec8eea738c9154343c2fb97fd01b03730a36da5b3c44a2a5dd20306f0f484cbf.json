@@ -1,0 +1,143 @@
+{
+  "v": 1,
+  "stream": "fuzzmuster.attempt",
+  "record_id": "attempt-208a8cf10d09d9c0bfa23b3dc990958c4190cd9a2aac5ab179f1f2a6bf1f1699",
+  "revision": 1,
+  "payload_contract": "contract: fuzzmuster-attempt/v0",
+  "payload": {
+    "v": 0,
+    "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+    "job_id": "parse_stream",
+    "task_id": "sha256:ae0de7dc2766f248f347107f064b7b3d56897401cd7117d07a070a9b52673280",
+    "attempt_n": 1,
+    "attempt_id": "sha256:208a8cf10d09d9c0bfa23b3dc990958c4190cd9a2aac5ab179f1f2a6bf1f1699",
+    "result": "succeeded",
+    "outcome_code": "budget_reached",
+    "budget": {
+      "planned": "PT1H",
+      "used": "PT1H",
+      "reached": true
+    },
+    "worker_claims": {
+      "platform": {
+        "os": "linux",
+        "arch": "amd64"
+      },
+      "subject_binary": "sha256:3f3e5f22d417ba2331917a7864db73e7341e39097551f6dd19f365f2210990e1",
+      "toolchain": {
+        "adapter": "cargo-fuzz",
+        "adapter_version": "0.12.0",
+        "engine": "libfuzzer",
+        "toolchain": "nightly-2026-11-01",
+        "sanitizer": "address"
+      },
+      "limits": [
+        {
+          "control": "engine_input_timeout",
+          "duration": "PT10S",
+          "enforced_by": "engine"
+        },
+        {
+          "control": "engine_rss_limit",
+          "mebibytes": 1024,
+          "enforced_by": "engine"
+        },
+        {
+          "control": "outputs_outside_worktree",
+          "enforced_by": "supervisor"
+        }
+      ],
+      "started_at": "2026-11-26T11:00:00.000000Z",
+      "ended_at": "2026-11-26T12:00:00.000000Z"
+    },
+    "observations": {
+      "executions": 11900000,
+      "coverage": [
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT15M",
+          "value": 508
+        },
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT30M",
+          "value": 529
+        },
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT1H",
+          "value": 533
+        }
+      ],
+      "corpus": {
+        "digest": "sha256:947dc6a3c4392e69a6ad8a0e00ba55e935861c79e1f503011dc37355780d4a40",
+        "length": 59,
+        "media_type": "application/octet-stream",
+        "encryption": {
+          "scheme": "fixture",
+          "key_ref": "fixture-key"
+        }
+      },
+      "findings": [
+        {
+          "finding_id": "parse-stream-1",
+          "kind": "crash",
+          "input": {
+            "digest": "sha256:8f67193b8d956acd136dcbb345f588dbf026d4af07ad9684774990aad899612f",
+            "length": 55,
+            "media_type": "application/octet-stream",
+            "encryption": {
+              "scheme": "fixture",
+              "key_ref": "fixture-key"
+            }
+          },
+          "first_seen": "PT12M30S"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "role": "corpus_manifest",
+        "custody": "private",
+        "body": {
+          "digest": "sha256:947dc6a3c4392e69a6ad8a0e00ba55e935861c79e1f503011dc37355780d4a40",
+          "length": 59,
+          "media_type": "application/octet-stream",
+          "encryption": {
+            "scheme": "fixture",
+            "key_ref": "fixture-key"
+          }
+        }
+      },
+      {
+        "role": "finding_input",
+        "custody": "private",
+        "body": {
+          "digest": "sha256:8f67193b8d956acd136dcbb345f588dbf026d4af07ad9684774990aad899612f",
+          "length": 55,
+          "media_type": "application/octet-stream",
+          "encryption": {
+            "scheme": "fixture",
+            "key_ref": "fixture-key"
+          }
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "actor_kind": "process",
+    "actor": "fuzzmuster-worker",
+    "tool": "fuzzmuster 0.0.0-fixture"
+  },
+  "produced_at": {
+    "instant": "2026-11-26T12:00:00.000000Z",
+    "source": "producer_clock"
+  },
+  "classification": {
+    "retention": "standard",
+    "sensitivity": "1-confidential"
+  }
+}

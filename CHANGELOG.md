@@ -8,6 +8,12 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Draft v0 formats for the project file, plan and result bundle
+  (`docs/design/records-v0.md`), with JSON schemas, a synthetic example
+  project (`examples/toyparse`) and fixtures with hand-written expected
+  verification outcomes. Results are durable-record/v1 records in a
+  record-collection/v0 set; the crucible schemas used are copied unedited with
+  checksums.
 - `doctor` and `envinfo` write their reports to stderr at every log level;
   a configuration that fails to load stops every command except `version`,
   help, `envinfo` and `doctor`, which reports it (exit 20).

@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "The render_record disposition cites the parse_stream attempt record."
+}

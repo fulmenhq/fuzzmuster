@@ -66,6 +66,7 @@ REQUIRE_GONEAT = @if [ -z "$(GONEAT_BIN)" ]; then echo "error: goneat not found;
 .PHONY: deps-check-test content-check surface-tests check check-platform precommit prepush pr-final
 .PHONY: clean license-check surface-scan surface-scan-ci surface-scan-release release-tooling-test
 .PHONY: release-github-preflight release-preflight release-guard-tag-name release-guard-tag-version release-guard-release-surfaces sync-changelog-links release-prepare-tag-message release-tag
+.PHONY: fixtures-check fixtures-build third-party-check
 .PHONY: release-push-tag release-verify-tag release-verify-published-tag release-verify-remote-tag release-export-pin release-validate-pin release-insert-anchors release-anchors-check
 
 all: check
@@ -234,6 +235,15 @@ content-check: ## Refuse local paths, private keys, tokens and commit markers in
 surface-tests: ## Controls for content-check
 	@scripts/content-check.test.sh
 
+fixtures-check: ## The v0 result fixtures match their builder (expected.json files are hand-written)
+	@$(PYTHON) -I -B scripts/fixtures-v0.py check
+
+fixtures-build: ## Rebuild the v0 result fixtures (keeps hand-written expected.json files)
+	@$(PYTHON) -I -B scripts/fixtures-v0.py build
+
+third-party-check: ## Copied third-party schemas match the checksums in their PROVENANCE.md
+	@$(PYTHON) -I -B scripts/third-party-check.py
+
 license-check: ## LICENSE-MIT and LICENSE-APACHE are verbatim; notices live in NOTICE
 	@$(PYTHON) -I -B scripts/license-check.py
 
@@ -320,7 +330,7 @@ release-anchors-check: ## The committed public pin matches both fingerprint anch
 
 # --- Gates -------------------------------------------------------------------
 
-check-platform: version-check vet-fmt test smoke deps-check content-check surface-tests license-check ## Native-cell subset of check (no goneat)
+check-platform: version-check vet-fmt test smoke deps-check content-check surface-tests license-check fixtures-check third-party-check ## Native-cell subset of check (no goneat)
 	@echo "[ok] check-platform"
 
 check: check-platform fmt-check lint deps-check-test ## Everything the Linux CI cells run

@@ -1,0 +1,21 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": { "status": "valid", "problems": [], "bodies_withheld": 0 },
+  "completeness": {
+    "status": "incomplete",
+    "jobs": [
+      { "job_id": "parse_record", "required": true, "state": "not_started", "reason": "unsupported_host", "budget_reached": false, "attempts": 0 },
+      { "job_id": "parse_stream", "required": true, "state": "not_started", "reason": "unsupported_host", "budget_reached": false, "attempts": 0 },
+      { "job_id": "render_record", "required": true, "state": "not_started", "reason": "unsupported_host", "budget_reached": false, "attempts": 0 }
+    ]
+  },
+  "observations": {
+    "status": "reported",
+    "basis": "worker_claim",
+    "finding_count": 0,
+    "findings": [],
+    "jobs": []
+  },
+  "exit_code": 93
+}

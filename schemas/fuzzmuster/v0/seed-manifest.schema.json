@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/seed-manifest.schema.json",
+  "title": "fuzzmuster seed manifest",
+  "description": "Content pin for a directory of reviewed seeds. Its document digest is the plan's jobs[].seeds.manifest_digest. Entries are sorted by path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "entries"
+  ],
+  "properties": {
+    "v": {
+      "const": 0
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "digest",
+          "length"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "common.schema.json#/$defs/relPath"
+          },
+          "digest": {
+            "$ref": "common.schema.json#/$defs/digest"
+          },
+          "length": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      }
+    }
+  }
+}

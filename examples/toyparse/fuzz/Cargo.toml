@@ -1,0 +1,36 @@
+[package]
+name = "toyparse-fuzz"
+version = "0.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+toyparse = { path = ".." }
+
+[[bin]]
+name = "parse_record"
+path = "fuzz_targets/parse_record.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "parse_stream"
+path = "fuzz_targets/parse_stream.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "render_record"
+path = "fuzz_targets/render_record.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

@@ -7,3 +7,8 @@
 # Build artifacts
 bin/
 dist/
+
+# Byte-exact inputs: digested fixtures, copied third-party schemas, example seeds
+testdata/fixtures/
+schemas/third_party/
+examples/*/fuzz/seeds/

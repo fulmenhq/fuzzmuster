@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/attempt.schema.json",
+  "title": "fuzzmuster attempt payload (contract: fuzzmuster-attempt/v0)",
+  "description": "Payload of a durable-record/v1 record in stream fuzzmuster.attempt, written once per attempt. Everything under worker_claims is what the worker reports about itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "plan_digest",
+    "job_id",
+    "task_id",
+    "attempt_n",
+    "attempt_id",
+    "result",
+    "outcome_code",
+    "budget",
+    "worker_claims",
+    "observations",
+    "artifacts"
+  ],
+  "properties": {
+    "v": {
+      "const": 0
+    },
+    "plan_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "task_id": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "attempt_n": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "attempt_id": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "result": {
+      "enum": [
+        "succeeded",
+        "failed",
+        "cancelled",
+        "abandoned"
+      ]
+    },
+    "outcome_code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planned",
+        "used",
+        "reached"
+      ],
+      "properties": {
+        "planned": {
+          "$ref": "common.schema.json#/$defs/duration"
+        },
+        "used": {
+          "$ref": "common.schema.json#/$defs/duration"
+        },
+        "reached": {
+          "type": "boolean"
+        }
+      }
+    },
+    "worker_claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "toolchain",
+        "limits",
+        "started_at",
+        "ended_at"
+      ],
+      "properties": {
+        "platform": {
+          "$ref": "common.schema.json#/$defs/platform"
+        },
+        "subject_binary": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "toolchain": {
+          "$ref": "common.schema.json#/$defs/toolchain"
+        },
+        "limits": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "common.schema.json#/$defs/limit"
+          }
+        },
+        "started_at": {
+          "$ref": "common.schema.json#/$defs/instant"
+        },
+        "ended_at": {
+          "$ref": "common.schema.json#/$defs/instant"
+        }
+      }
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executions",
+        "coverage",
+        "findings"
+      ],
+      "properties": {
+        "executions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coverage": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "engine",
+              "unit",
+              "at",
+              "value"
+            ],
+            "properties": {
+              "engine": {
+                "enum": [
+                  "libfuzzer",
+                  "go-fuzz-native"
+                ]
+              },
+              "unit": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,31}$"
+              },
+              "at": {
+                "$ref": "common.schema.json#/$defs/duration"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            }
+          }
+        },
+        "corpus": {
+          "$ref": "common.schema.json#/$defs/bodyRef"
+        },
+        "findings": {
+          "type": "array",
+          "maxItems": 1024,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "finding_id",
+              "kind",
+              "input",
+              "first_seen"
+            ],
+            "properties": {
+              "finding_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+              },
+              "kind": {
+                "enum": [
+                  "crash",
+                  "timeout",
+                  "out_of_memory",
+                  "leak",
+                  "slow_input"
+                ]
+              },
+              "input": {
+                "$ref": "common.schema.json#/$defs/encryptedBodyRef"
+              },
+              "minimized": {
+                "$ref": "common.schema.json#/$defs/encryptedBodyRef"
+              },
+              "first_seen": {
+                "$ref": "common.schema.json#/$defs/duration"
+              }
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "custody",
+          "body"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "corpus_manifest",
+              "finding_input",
+              "finding_minimized",
+              "engine_log",
+              "replay_log"
+            ]
+          },
+          "custody": {
+            "enum": [
+              "private",
+              "public"
+            ]
+          },
+          "body": {
+            "$ref": "common.schema.json#/$defs/bodyRef"
+          }
+        },
+        "if": {
+          "required": [
+            "role"
+          ],
+          "properties": {
+            "role": {
+              "enum": [
+                "finding_input",
+                "finding_minimized"
+              ]
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "body": {
+              "$ref": "common.schema.json#/$defs/encryptedBodyRef"
+            }
+          }
+        }
+      }
+    }
+  }
+}

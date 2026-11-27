@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "The host could not demonstrate a required control, so no job started. Valid, incomplete, no observations."
+}

@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "complete-clean with the bundled engine log ciphertext altered."
+}

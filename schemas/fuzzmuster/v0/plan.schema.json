@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/plan.schema.json",
+  "title": "fuzzmuster plan",
+  "description": "A resolved plan. Its document digest (SHA-256 of its RFC 8785 bytes) is the plan digest that every result names. The verifier keeps its own trusted copy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "kind",
+    "project",
+    "source",
+    "profile",
+    "platform",
+    "toolchain",
+    "required_controls",
+    "budget",
+    "jobs"
+  ],
+  "properties": {
+    "v": {
+      "const": 0
+    },
+    "kind": {
+      "const": "fuzzmuster.plan"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "file_digest"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+        },
+        "file_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vcs",
+        "revision"
+      ],
+      "properties": {
+        "vcs": {
+          "const": "git"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "mode"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+        },
+        "mode": {
+          "enum": [
+            "replay",
+            "mutate"
+          ]
+        }
+      }
+    },
+    "platform": {
+      "allOf": [
+        {
+          "$ref": "common.schema.json#/$defs/platformFields"
+        }
+      ],
+      "properties": {
+        "image_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "toolchain": {
+      "$ref": "common.schema.json#/$defs/toolchain"
+    },
+    "required_controls": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "$ref": "common.schema.json#/$defs/control"
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "per_job",
+        "total"
+      ],
+      "properties": {
+        "per_job": {
+          "$ref": "common.schema.json#/$defs/duration"
+        },
+        "total": {
+          "$ref": "common.schema.json#/$defs/duration"
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "job_id",
+          "target",
+          "entry",
+          "required",
+          "budget",
+          "seeds"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "target": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "entry": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "budget": {
+            "$ref": "common.schema.json#/$defs/duration"
+          },
+          "seeds": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "manifest_digest",
+              "count"
+            ],
+            "properties": {
+              "manifest_digest": {
+                "$ref": "common.schema.json#/$defs/digest"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

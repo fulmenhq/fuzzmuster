@@ -1,0 +1,79 @@
+{
+  "v": 0,
+  "kind": "fuzzmuster.plan",
+  "project": {
+    "name": "toyparse",
+    "file_digest": "sha256:c790612ae597fc1b16053e2701c337c97a4ec5e28550a7c9730f881c50c7de37"
+  },
+  "source": {
+    "vcs": "git",
+    "revision": "0123456789abcdef0123456789abcdef01234567"
+  },
+  "profile": {
+    "name": "linux-mutate",
+    "mode": "mutate"
+  },
+  "platform": {
+    "os": "linux",
+    "arch": "amd64"
+  },
+  "toolchain": {
+    "adapter": "cargo-fuzz",
+    "adapter_version": "0.12.0",
+    "engine": "libfuzzer",
+    "toolchain": "nightly-2026-11-01",
+    "sanitizer": "address"
+  },
+  "required_controls": [
+    {
+      "control": "engine_input_timeout",
+      "duration": "PT10S"
+    },
+    {
+      "control": "engine_rss_limit",
+      "mebibytes": 1024
+    },
+    {
+      "control": "outputs_outside_worktree"
+    }
+  ],
+  "budget": {
+    "per_job": "PT30M",
+    "total": "PT90M"
+  },
+  "jobs": [
+    {
+      "job_id": "parse_record",
+      "target": "parse_record",
+      "entry": "parse_record",
+      "required": true,
+      "budget": "PT30M",
+      "seeds": {
+        "manifest_digest": "sha256:a53c6cab51da780ac9061409eadc31ba0cd2fd9c4ac2628df758681996bf495f",
+        "count": 3
+      }
+    },
+    {
+      "job_id": "parse_stream",
+      "target": "parse_stream",
+      "entry": "parse_stream",
+      "required": true,
+      "budget": "PT30M",
+      "seeds": {
+        "manifest_digest": "sha256:337da7c3cf335f3dcdd36b6f01eaec514069a95047a0e3ee1e1a676f490a86c7",
+        "count": 2
+      }
+    },
+    {
+      "job_id": "render_record",
+      "target": "render_record",
+      "entry": "render_record",
+      "required": true,
+      "budget": "PT30M",
+      "seeds": {
+        "manifest_digest": "sha256:39f28c68bea91718ee1a65b0dcc44e379acca3887663cd32020b6f123f8347af",
+        "count": 2
+      }
+    }
+  ]
+}

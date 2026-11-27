@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "render_record reports a 30 minute budget, used and reached, and the campaign agrees; the trusted plan sets 1 hour."
+}

@@ -1,0 +1,124 @@
+{
+  "v": 1,
+  "stream": "fuzzmuster.attempt",
+  "record_id": "attempt-24f37030fe9c3256c4377178dec6ab26d06765b60da0316b05d5c582dd72eb14",
+  "revision": 1,
+  "payload_contract": "contract: fuzzmuster-attempt/v0",
+  "payload": {
+    "v": 0,
+    "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+    "job_id": "parse_record",
+    "task_id": "sha256:9209cff1117b96d013db567fd37d75cec450ca98bcbe29a3e921f2b09cbf85aa",
+    "attempt_n": 1,
+    "attempt_id": "sha256:24f37030fe9c3256c4377178dec6ab26d06765b60da0316b05d5c582dd72eb14",
+    "result": "succeeded",
+    "outcome_code": "budget_reached",
+    "budget": {
+      "planned": "PT1H",
+      "used": "PT1H",
+      "reached": true
+    },
+    "worker_claims": {
+      "platform": {
+        "os": "linux",
+        "arch": "amd64"
+      },
+      "subject_binary": "sha256:53fbb5141882e657a0190abb79dc924b43c35733170d838f66f341ec92757e4d",
+      "toolchain": {
+        "adapter": "cargo-fuzz",
+        "adapter_version": "0.12.0",
+        "engine": "libfuzzer",
+        "toolchain": "nightly-2026-11-01",
+        "sanitizer": "address"
+      },
+      "limits": [
+        {
+          "control": "engine_input_timeout",
+          "duration": "PT10S",
+          "enforced_by": "engine"
+        },
+        {
+          "control": "engine_rss_limit",
+          "mebibytes": 1024,
+          "enforced_by": "engine"
+        },
+        {
+          "control": "outputs_outside_worktree",
+          "enforced_by": "supervisor"
+        }
+      ],
+      "started_at": "2026-11-26T10:00:00.000000Z",
+      "ended_at": "2026-11-26T11:00:00.000000Z"
+    },
+    "observations": {
+      "executions": 18400000,
+      "coverage": [
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT15M",
+          "value": 412
+        },
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT30M",
+          "value": 431
+        },
+        {
+          "engine": "libfuzzer",
+          "unit": "cov",
+          "at": "PT1H",
+          "value": 437
+        }
+      ],
+      "corpus": {
+        "digest": "sha256:3b81f1f083c3d294324353fcd3478b6c2be0c762430e1743a1a3a6d3ca778d74",
+        "length": 59,
+        "media_type": "application/octet-stream",
+        "encryption": {
+          "scheme": "fixture",
+          "key_ref": "fixture-key"
+        }
+      },
+      "findings": []
+    },
+    "artifacts": [
+      {
+        "role": "corpus_manifest",
+        "custody": "private",
+        "body": {
+          "digest": "sha256:3b81f1f083c3d294324353fcd3478b6c2be0c762430e1743a1a3a6d3ca778d74",
+          "length": 59,
+          "media_type": "application/octet-stream",
+          "encryption": {
+            "scheme": "fixture",
+            "key_ref": "fixture-key"
+          }
+        }
+      },
+      {
+        "role": "engine_log",
+        "custody": "public",
+        "body": {
+          "digest": "sha256:75178e1b0350f07773e49c01c700d5e0eb8c2fa778f6a711a722537e8f32fd12",
+          "length": 58,
+          "media_type": "text/plain"
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "actor_kind": "process",
+    "actor": "fuzzmuster-worker",
+    "tool": "fuzzmuster 0.0.0-fixture"
+  },
+  "produced_at": {
+    "instant": "2026-11-26T11:00:00.000000Z",
+    "source": "producer_clock"
+  },
+  "classification": {
+    "retention": "standard",
+    "sensitivity": "1-confidential"
+  }
+}

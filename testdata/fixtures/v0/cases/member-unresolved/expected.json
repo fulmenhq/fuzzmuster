@@ -1,0 +1,13 @@
+{
+  "v": 0,
+  "plan_digest": "sha256:68e2335305acfa9cd3e28fa04ea8d79d0f55bab6b61541323d6561cb680d0f17",
+  "validity": {
+    "status": "invalid",
+    "problems": [
+      { "code": "member_unresolved", "record_id": "attempt-2e79fff030d040b067125fd21603d47292a08dd13b692b3c98d6bb8497ddd780" }
+    ]
+  },
+  "completeness": { "status": "not_assessed" },
+  "observations": { "status": "not_assessed" },
+  "exit_code": 63
+}

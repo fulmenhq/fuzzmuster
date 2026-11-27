@@ -1,0 +1,493 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/verify-report.schema.json",
+  "title": "fuzzmuster verify report",
+  "description": "Output of `fuzzmuster verify --format json`. Validity, completeness and observations are reported separately. When the bundle is invalid, completeness and observations are not assessed and the exit code is 63. Otherwise the exit code is 91 when there is a finding, else 93 when incomplete, else 0. Observations are worker claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "plan_digest",
+    "validity",
+    "completeness",
+    "observations",
+    "exit_code"
+  ],
+  "properties": {
+    "v": {
+      "const": 0
+    },
+    "plan_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "problems"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "valid",
+            "invalid"
+          ]
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "enum": [
+                  "bundle_invalid",
+                  "member_unresolved",
+                  "member_digest_mismatch",
+                  "record_invalid",
+                  "body_digest_mismatch",
+                  "body_not_encrypted",
+                  "body_unreferenced",
+                  "campaign_missing",
+                  "campaign_duplicate",
+                  "plan_mismatch",
+                  "job_not_in_plan",
+                  "identity_mismatch",
+                  "disposition_missing",
+                  "disposition_duplicate",
+                  "disposition_attempt_mismatch",
+                  "attempt_conflict",
+                  "attempt_not_cited",
+                  "budget_mismatch",
+                  "limit_not_demonstrated",
+                  "public_custody_in_mutate",
+                  "encryption_missing"
+                ]
+              },
+              "job_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+              },
+              "record_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "body": {
+                "$ref": "common.schema.json#/$defs/digest",
+                "description": "Byte digest of a bundled body that no member artifact references."
+              }
+            }
+          }
+        },
+        "bodies_withheld": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "valid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "problems": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "problems": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "completeness": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": "not_assessed"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "jobs"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "complete",
+                "incomplete"
+              ]
+            },
+            "jobs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id",
+                  "required",
+                  "state",
+                  "reason",
+                  "budget_reached",
+                  "attempts"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "state": {
+                    "enum": [
+                      "succeeded",
+                      "failed",
+                      "cancelled",
+                      "abandoned",
+                      "not_started"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                  },
+                  "budget_reached": {
+                    "type": "boolean"
+                  },
+                  "attempts": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "observations": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": "not_assessed"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "basis",
+            "finding_count",
+            "findings",
+            "jobs"
+          ],
+          "properties": {
+            "status": {
+              "const": "reported"
+            },
+            "basis": {
+              "const": "worker_claim"
+            },
+            "finding_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id",
+                  "attempt_id",
+                  "finding_id",
+                  "kind"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+                  },
+                  "attempt_id": {
+                    "$ref": "common.schema.json#/$defs/digest"
+                  },
+                  "finding_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "crash",
+                      "timeout",
+                      "out_of_memory",
+                      "leak",
+                      "slow_input"
+                    ]
+                  }
+                }
+              }
+            },
+            "jobs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "job_id",
+                  "attempt_id",
+                  "subject_binary",
+                  "executions"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+                  },
+                  "attempt_id": {
+                    "$ref": "common.schema.json#/$defs/digest",
+                    "description": "The attempt that supplied the job's disposition; the metrics come from it."
+                  },
+                  "subject_binary": {
+                    "$ref": "common.schema.json#/$defs/digest",
+                    "description": "Worker-claimed digest of the fuzz binary that produced the metrics."
+                  },
+                  "executions": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "coverage": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "engine",
+                      "unit",
+                      "value"
+                    ],
+                    "properties": {
+                      "engine": {
+                        "type": "string"
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "exit_code": {
+      "enum": [
+        0,
+        63,
+        91,
+        93
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "validity": {
+            "properties": {
+              "status": {
+                "const": "invalid"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "validity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completeness": {
+            "properties": {
+              "status": {
+                "const": "not_assessed"
+              }
+            }
+          },
+          "observations": {
+            "properties": {
+              "status": {
+                "const": "not_assessed"
+              }
+            }
+          },
+          "exit_code": {
+            "const": 63
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "completeness": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "complete",
+                  "incomplete"
+                ]
+              }
+            }
+          },
+          "observations": {
+            "properties": {
+              "status": {
+                "const": "reported"
+              }
+            }
+          },
+          "exit_code": {
+            "enum": [
+              0,
+              91,
+              93
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "observations": {
+            "properties": {
+              "finding_count": {
+                "minimum": 1
+              }
+            },
+            "required": [
+              "finding_count"
+            ]
+          }
+        },
+        "required": [
+          "observations"
+        ]
+      },
+      "then": {
+        "properties": {
+          "exit_code": {
+            "const": 91
+          },
+          "observations": {
+            "properties": {
+              "findings": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "observations": {
+            "properties": {
+              "finding_count": {
+                "const": 0
+              }
+            },
+            "required": [
+              "finding_count"
+            ]
+          }
+        },
+        "required": [
+          "observations"
+        ]
+      },
+      "then": {
+        "properties": {
+          "observations": {
+            "properties": {
+              "findings": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "completeness": {
+              "properties": {
+                "status": {
+                  "const": "incomplete"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          },
+          "required": [
+            "completeness"
+          ]
+        },
+        "then": {
+          "properties": {
+            "exit_code": {
+              "const": 93
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "exit_code": {
+              "const": 0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

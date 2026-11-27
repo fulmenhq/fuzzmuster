@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.fulmenhq.dev/fuzzmuster/v0/campaign.schema.json",
+  "title": "fuzzmuster campaign payload (contract: fuzzmuster-campaign/v0)",
+  "description": "Payload of a durable-record/v1 record in stream fuzzmuster.campaign. One disposition per planned job, written by the collector.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "plan_digest",
+    "host_check",
+    "jobs"
+  ],
+  "properties": {
+    "v": {
+      "const": 0
+    },
+    "plan_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "host_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "supported",
+            "unsupported"
+          ]
+        },
+        "missing": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "common.schema.json#/$defs/control"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "unsupported"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "missing"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "missing"
+          ]
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "job_id",
+          "task_id",
+          "state",
+          "reason",
+          "budget_reached"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "task_id": {
+            "$ref": "common.schema.json#/$defs/digest"
+          },
+          "state": {
+            "enum": [
+              "succeeded",
+              "failed",
+              "cancelled",
+              "abandoned",
+              "not_started"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "budget_reached": {
+            "type": "boolean"
+          },
+          "attempt": {
+            "$ref": "common.schema.json#/$defs/pin"
+          },
+          "earlier_attempts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {
+              "$ref": "common.schema.json#/$defs/pin"
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "state": {
+              "const": "not_started"
+            }
+          }
+        },
+        "then": {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "attempt"
+                ]
+              },
+              {
+                "required": [
+                  "earlier_attempts"
+                ]
+              }
+            ]
+          },
+          "properties": {
+            "budget_reached": {
+              "const": false
+            }
+          }
+        },
+        "else": {
+          "required": [
+            "attempt"
+          ]
+        }
+      }
+    }
+  }
+}

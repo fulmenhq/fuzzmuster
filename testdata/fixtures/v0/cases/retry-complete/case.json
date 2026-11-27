@@ -1,0 +1,4 @@
+{
+  "plan": "../../plans/toyparse-linux-mutate.plan.json",
+  "description": "render_record attempt 1 was abandoned and attempt 2 reached the budget. The campaign record is revision 2 and retains attempt 1. Valid, complete."
+}
